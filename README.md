@@ -2,13 +2,13 @@
 Версия 1.1.2
 
 ###Lua для Wi-Fi модулей esp8266
-Построить на [ESP8266 sdk 1.1.2 + Патчи](http://bbs.espressif.com/viewforum.php?f=5)<br />
+Построен на частях от [ESP8266 sdk 1.1.2 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
 Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
 Сjson на основе [lua-cjson](https://github.com/mpx/lua-cjson)<br />
 Файловая система основана на [spiffs](https://github.com/pellepl/spiffs)<br />
 
-
 # Резюме
+- Для детей, поиграться на вечер 
 - Легкий доступ к беспроводному маршрутизатору
 - Основа (ядро) на Lua 5.1.4
 - Предпочтительно программирование событий-Драйв.
