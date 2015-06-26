@@ -1,38 +1,30 @@
 # **EspLua.ru** #
-version 1.1.2
+Версия 1.1.2
 
-###A lua based firmware for wifi-soc esp8266
-Build on [ESP8266 sdk 1.1.2 + Patchs](http://bbs.espressif.com/viewforum.php?f=5)<br />
-Lua core based on [eLua project](http://www.eluaproject.net/)<br />
-cjson based on [lua-cjson](https://github.com/mpx/lua-cjson)<br />
-File system based on [spiffs](https://github.com/pellepl/spiffs)<br />
+###Lua для Wi-Fi модулей esp8266
+Построить на [ESP8266 sdk 1.1.2 + Патчи](http://bbs.espressif.com/viewforum.php?f=5)<br />
+Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
+Сjson на основе [lua-cjson](https://github.com/mpx/lua-cjson)<br />
+Файловая система основана на [spiffs](https://github.com/pellepl/spiffs)<br />
 
 
-# Summary
-- Easy to access wireless router
-- Based on Lua 5.1.4 (without *debug, os* module.)
-- Event-Drive programming preferred.
-- Build-in json, file, timer, pwm, i2c, spi, 1-wire, net, mqtt, coap, gpio, wifi, adc, uart and system api.
-- GPIO pin re-mapped, use the index to access gpio, i2c, pwm.
-- Both Integer(less memory usage) and Float version firmware provided.
+# Резюме
+- Легкий доступ к беспроводному маршрутизатору
+- Основа (ядро) на Lua 5.1.4
+- Предпочтительно программирование событий-Драйв.
+- Встроено json, file, timer, pwm, i2c, spi, 1-wire, net, mqtt, coap, gpio, wifi, adc, uart and system api.
+- Используется индекс для доступа к gpio, i2c, pwm.
+- Используются Integer и Float.
 
-# To Do List (pull requests are very welcomed)
-- loadable c module
-- fix wifi smart connect
-- add spi module (done)
-- add mqtt module (done)
-- add coap module (done)
-- cross compiler (done)
-
-# Change log
+# Журнал версий
 
 2015-06-25<br />
-Start progect<br />
+Начало проекта<br />
 
-#Start log
+#Стартовый лог
 
 ```lua
-EspLua 1.1.2 build 20150626  powered by Lua 5.1.4
+EspLua.ru 1.1.2 build 20150626  powered by Lua 5.1.4
 Hello, world.
 > print("heap:", node.heap())
 heap:	19032
@@ -40,7 +32,7 @@ heap:	19032
 
 
 
-##GPIO TABLE 
+##Таблица GPIO
 
 <a id="gpio_map"></a>
 <table>
@@ -72,20 +64,20 @@ heap:	19032
     <td>7</td><td>GPIO13</td><td></td><td></td>
    </tr>
 </table>
-#### [*] D0(GPIO16) can only be used as gpio read/write. no interrupt supported. no pwm/i2c/ow supported.
+#### [*] В текущей версии D0(GPIO16) может быть использован только в качестве ножки ввода для чтения уровня 1 или 0. Другие функции, пока, с ним не работают.
 
-#Flash the firmware
+#Прошивка Flash 
 0x00000.bin: 0x00000<br />
 0x0C000.bin: 0x0C000<br />
+esp_init_data_default.bin: 0x7C000<br /> 
+blank.bin: 0x7E000<br />
 
-*Better run file.format() after flash*
-
-#Connect the hardware in serial
+#Cкорость передачи RS-232 TTL по умолчанию
 baudrate:9600
 
-#Start play
+#Начните игру
 
-####Connect to your ap
+####Подключение к точке доступа
 
 ```lua
     ip = wifi.sta.getip()
@@ -98,7 +90,7 @@ baudrate:9600
     --192.168.18.110
 ```
 
-####Manipulate hardware like a arduino
+####Манипулирование оборудованием, как в Arduino
 
 ```lua
     pin = 1
@@ -107,7 +99,7 @@ baudrate:9600
     print(gpio.read(pin))
 ```
 
-####Write network application in nodejs style
+####Простейший клиент HTTP в стиле nodejs
 
 ```lua
     -- A simple http client
@@ -118,7 +110,7 @@ baudrate:9600
         .."Connection: keep-alive\r\nAccept: */*\r\n\r\n")
 ```
 
-####Or a simple http server
+####Или простейший HTTP-сервер
 
 ```lua
     -- A simple http server
@@ -132,7 +124,7 @@ baudrate:9600
     end)
 ```
 
-####Connect to MQTT Broker
+####Подключение к MQTT Брокеру
 
 ```lua
 -- init mqtt client with keepalive timer 120sec
@@ -169,7 +161,7 @@ m:close();
 
 ```
 
-#### UDP client and server
+#### UDP клиент и сервер
 ```lua
 -- a udp server
 s=net.createServer(net.UDP)
@@ -183,7 +175,7 @@ cu:connect(5683,"192.168.18.101")
 cu:send("hello")
 ```
 
-####Do something shining
+####Сделайть что-нибудь с ШИМ 
 ```lua
   function led(r,g,b)
     pwm.setduty(1,r)
@@ -200,7 +192,7 @@ cu:send("hello")
   led(0,0,512) -- blue
 ```
 
-####And blink it
+####Мигать светодиодом
 ```lua
   lighton=0
   tmr.alarm(1,1000,1,function()
@@ -214,7 +206,7 @@ cu:send("hello")
   end)
 ```
 
-####If you want to run something when system started
+####Запустить что-то, при старте системы (авто-запускаемый файл при старте)
 ```lua
   --init.lua will be excuted
   file.open("init.lua","w")
@@ -223,7 +215,7 @@ cu:send("hello")
   node.restart()  -- this will restart the module.
 ```
 
-####With below code, you can telnet to your esp8266 now
+####Пародия на Telnet
 ```lua
     -- a simple telnet server
     s=net.createServer(net.TCP,180)
@@ -244,7 +236,7 @@ cu:send("hello")
     end)
 ```
 
-####Use DS18B20 module extends your esp8266
+####Использование DS18B20
 ```lua
     -- read temperature with DS18B20
     node.compile("ds18b20.lua")   --  run this only once to compile and save to "ds18b20.lc"
@@ -271,125 +263,34 @@ cu:send("hello")
     package.loaded["ds18b20"]=nil
 ```
 
-####Operate a display via I2c with u8glib
-u8glib is a graphics library with support for many different displays.
-The integration in nodemcu is developed for SSD1306 based display attached via the I2C port. Further display types and SPI connectivity will be added in the future.
+####Работа с дисплеем через I2C с u8glib
+u8glib это графическая библиотека с поддержкой различных дисплеев. 
+Интеграция в nodemcu разработана на SSD1306 основе дисплея подключенного через порт I2C. 
+Другие виды отображения и подключения SPI будет добавлены по "просьбе трудящихся".
 
-U8glib v1.17
 
-#####I2C connection
-Hook up SDA and SCL to any free GPIOs. Eg. `lua_examples/u8glib/graphics_test.lua` expects SDA=5 (GPIO14) and SCL=6 (GPIO12). They are used to set up nodemcu's I2C driver before accessing the display:
+#####Соединение I2C 
+Подключите SDA и SCL на любые свободные GPIOs. Пример `lua_examples/u8glib/graphics_test.lua` SDA=5 (GPIO14) и SCL=6 (GPIO12). Они используются для настройки драйвера I2C EspLua.ru перед доступом к дисплею:
 ```lua
 sda = 5
 scl = 6
 i2c.setup(0, sda, scl, i2c.SLOW)
 ```
 
-#####SPI connection
-The HSPI module is used, so certain pins are fixed:
+#####Соединение SPI
+Используется аппартный HSPI на конкретных выводах ESP8266:
 * HSPI CLK  = GPIO14
 * HSPI MOSI = GPIO13
 * HSPI MISO = GPIO12 (not used)
 
-All other pins can be assigned to any available GPIO:
+Другие выводы на любых доступных GPIO:
 * CS
 * D/C
-* RES (optional for some displays)
+* RES (опция для некоторых дисплеев)
 
-Also refer to the initialization sequence eg in `lua_examples/u8glib/graphics_test.lua`:
+Также обратитесь к последовательности инициализации, например в `lua_examples/u8glib/graphics_test.lua`:
 ```lua
 spi.setup(1, spi.MASTER, spi.CPOL_LOW, spi.CPHA_LOW, spi.DATABITS_8, 0)
 ```
 
-
-#####Library usage
-The Lua bindings for this library closely follow u8glib's object oriented C++ API. Based on the u8g class, you create an object for your display type.
-
-SSD1306 via I2C:
-```lua
-sla = 0x3c
-disp = u8g.ssd1306_128x64_i2c(sla)
-```
-SSD1306 via SPI:
-```lua
-cs  = 8 -- GPIO15, pull-down 10k to GND
-dc  = 4 -- GPIO2
-res = 0 -- GPIO16, RES is optional YMMV
-disp = u8g.ssd1306_128x64_spi(cs, dc, res)
-```
-
-This object provides all of u8glib's methods to control the display.
-Again, refer to `lua_examples/u8glib/graphics_test.lua` to get an impression how this is achieved with Lua code. Visit the [u8glib homepage](https://code.google.com/p/u8glib/) for technical details.
-
-#####Fonts
-u8glib comes with a wide range of fonts for small displays. Since they need to be compiled into the firmware image, you'd need to include them in `app/include/u8g_config.h` and recompile. Simply add the desired fonts to the font table:
-```c
-#define U8G_FONT_TABLE \
-    U8G_FONT_TABLE_ENTRY(font_6x10)  \
-    U8G_FONT_TABLE_ENTRY(font_chikita)
-```
-They'll be available as `u8g.<font_name>` in Lua.
-
-#####Bitmaps
-Bitmaps and XBMs are supplied as strings to `drawBitmap()` and `drawXBM()`. This off-loads all data handling from the u8g module to generic methods for binary files. See `lua_examples/u8glib/u8g_bitmaps.lua`. Binary files can be uploaded with [nodemcu-uploader.py](https://github.com/kmpm/nodemcu-uploader).
-
-#####Unimplemented functions
-- [ ] Cursor handling
-  - [ ] disableCursor()
-  - [ ] enableCursor()
-  - [ ] setCursorColor()
-  - [ ] setCursorFont()
-  - [ ] setCursorPos()
-  - [ ] setCursorStyle()
-- [ ] General functions
-  - [ ] setContrast()
-  - [ ] setPrintPos()
-  - [ ] setHardwareBackup()
-  - [ ] setRGB()
-
-
-####Control a WS2812 based light strip
-```lua
-	-- set the color of one LED on GPIO2 to red
-	ws2812.writergb(4, string.char(255, 0, 0))
-	-- set the color of 10 LEDs on GPIO0 to blue
-	ws2812.writergb(3, string.char(0, 0, 255):rep(10))
-	-- first LED green, second LED white
-	ws2812.writergb(4, string.char(0, 255, 0, 255, 255, 255))
-```
-
-####coap client and server
-```lua
--- use copper addon for firefox
-cs=coap.Server()
-cs:listen(5683)
-
-myvar=1
-cs:var("myvar") -- get coap://192.168.18.103:5683/v1/v/myvar will return the value of myvar: 1
-
--- function should tack one string, return one string.
-function myfun(payload)
-  print("myfun called")
-  respond = "hello"
-  return respond
-end
-cs:func("myfun") -- post coap://192.168.18.103:5683/v1/f/myfun will call myfun
-
-cc = coap.Client()
-cc:get(coap.CON, "coap://192.168.18.100:5683/.well-known/core")
-cc:post(coap.NON, "coap://192.168.18.100:5683/", "Hello")
-```
-
-####cjson
-
-```lua
--- Translate Lua value to/from JSON
--- text = cjson.encode(value)
--- value = cjson.decode(text)
-json_text = '[ true, { "foo": "bar" } ]'
-value = cjson.decode(json_text)
--- Returns: { true, { foo = "bar" } }
-value = { true, { foo = "bar" } }
-json_text = cjson.encode(value)
--- Returns: '[true,{"foo":"bar"}]'
-```
+Комментарии и остальное на форуме  [esp8266.ru](http://esp8266.ru/forum/)<br />
