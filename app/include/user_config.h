@@ -10,7 +10,7 @@
 #define USE_PVV_SPIFLASH 1
 #define USE_MAX_IRAM 48k
 
-// #define DEVELOP_VERSION
+//#define DEVELOP_VERSION
 
 #define USE_OPTIMIZE_PRINTF
 

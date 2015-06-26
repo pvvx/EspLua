@@ -18,7 +18,7 @@ SDK_TOOLS	?= c:/Espressif/utils
 #ESPTOOL		?= $(SDK_TOOLS)/esptool.exe
 ESPTOOL		?= C:/Python27/python.exe $(SDK_TOOLS)/esptool.py
 ESPTOOL-CK	?= $(SDK_TOOLS)/esptool-ck.exe
-ESPPORT		?= COM6
+ESPPORT		?= COM2
 ESPBAUD		?= 256000
 
 # SPI_SPEED = 20MHz, 26.7MHz, 40MHz, 80MHz

@@ -77,7 +77,7 @@ void nodemcu_init(void)
 
     // myspiffs_format();
 #ifdef DEVELOP_VERSION
-    test_spiffs();
+    // test_spiffs();
 #endif
     // endpoint_setup();
 
@@ -110,18 +110,16 @@ void user_init(void)
     system_timer_reinit();
     os_delay_us(1000);
 
+    os_printf("\nSDK version: %s\n", system_get_sdk_version());
 #ifdef NODE_DEBUG
-     NODE_DBG("\nSDK version: %s\n", system_get_sdk_version());
      system_print_meminfo();
-     NODE_DBG("Heap size: %u bytes.\n",system_get_free_heap_size());
+#endif
+    os_printf("Heap size: %u bytes.\n",system_get_free_heap_size());
      eram_init();
      flash_size_init();
-     NODE_DBG("Real Flash size: %u bytes.\n", flash_size);
-#else
-     eram_init();
-     flash_size_init();
+    os_printf("Real Flash size: %u bytes.\n", flash_size);
+#ifndef NODE_DEBUG
      system_set_os_print(0);
 #endif
-    
     system_init_done_cb(nodemcu_init);
 }
