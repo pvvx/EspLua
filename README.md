@@ -2,7 +2,7 @@
 version 1.1.2
 
 ###A lua based firmware for wifi-soc esp8266
-Build on [ESP8266 sdk 1.1.2 + Pathcs](http://bbs.espressif.com/viewforum.php?f=5)<br />
+Build on [ESP8266 sdk 1.1.2 + Patchs](http://bbs.espressif.com/viewforum.php?f=5)<br />
 Lua core based on [eLua project](http://www.eluaproject.net/)<br />
 cjson based on [lua-cjson](https://github.com/mpx/lua-cjson)<br />
 File system based on [spiffs](https://github.com/pellepl/spiffs)<br />
@@ -31,7 +31,8 @@ Start progect<br />
 
 #Start log
 
-```EspLua 1.1.2 build 20150626  powered by Lua 5.1.4
+```lua
+EspLua 1.1.2 build 20150626  powered by Lua 5.1.4
 Hello, world.
 > print("heap:", node.heap())
 heap:	19032
