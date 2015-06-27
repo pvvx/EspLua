@@ -250,8 +250,13 @@ char * flash_strcpy(char * pd_, void * ps, uint32 len);
 
 extern char print_mem_buf[256];
 
+extern uint32 stack_low;
+extern void test_system_stack(void);
+
 const char *flash_str2buf(const char * ps)
 {
+	uint32 i;
+	if(&i <= &stack_low) test_system_stack();
 	return (const char *)flash_strcpy(print_mem_buf, (void *) ps, sizeof(print_mem_buf));
 }
 
