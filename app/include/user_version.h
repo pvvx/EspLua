@@ -7,6 +7,6 @@
 #define NODE_VERSION_INTERNAL   0U
 
 #define NODE_VERSION	"EspLua.ru 1.1.2"
-#define BUILD_DATE	    "build 20150626"
+#define BUILD_DATE	    "build 20150627"
 
 #endif	/* __USER_VERSION_H__ */

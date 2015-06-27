@@ -15,7 +15,7 @@
 #endif
 
 #ifndef ICACHE_RODATA_ATTR
-#define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
+#define ICACHE_RODATA_ATTR __attribute__((aligned(4))) __attribute__((section(".irom.text")))
 #endif
 
 #if DEBUGSOO > 0
@@ -97,16 +97,15 @@ void  eram_init(void) {
 	}
 }
 
-
-bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
+void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s4d1(uint8 * pd, void * ps, uint32 len)
 {
 	union {
 		uint8 uc[4];
 		uint32 ud;
 	}tmp;
-	if (addr + len > eraminfo.size) return false;
-	uint32 *p = (uint32 *)(((uint32)eraminfo.base + addr) & (~3));
-	uint32 xlen = addr & 3;
+	uint32 *p = (uint32 *)((uint32)ps & (~3));
+	
+	uint32 xlen = (uint32)ps & 3;
 	if(xlen) {
 		tmp.ud = *p++;
 		while (len)  {
@@ -134,47 +133,58 @@ bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamRead(uint32 addr, uint
 			}
 		}
 	}
+}
+
+bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
+{
+	if (addr + len > eraminfo.size) return false;
+	copy_s4d1(pd, (void *)((uint32)eraminfo.base + addr), len);
 	return true;
 }
 
-bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *pd, uint32 len)
+void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s1d4(void * pd, uint8 * ps, uint32 len)
 {
 	union {
 		uint8 uc[4];
 		uint32 ud;
 	}tmp;
-	if (addr + len > eraminfo.size) return false;
-	uint32 *p = (uint32 *)(((uint32)eraminfo.base + addr) & (~3));
-	uint32 xlen = addr & 3;
+	uint32 *p = (uint32 *)(((uint32)pd) & (~3));
+	uint32 xlen = (uint32)pd & 3;
 	if(xlen) {
 		tmp.ud = *p;
 		while (len)  {
 			len--;
-			tmp.uc[xlen++] = *pd++;
+			tmp.uc[xlen++] = *ps++;
 			if(xlen & 4) break;
 		}
 		*p++ = tmp.ud;
 	}
 	xlen = len >> 2;
 	while(xlen) {
-		tmp.uc[0] = *pd++;
-		tmp.uc[1] = *pd++;
-		tmp.uc[2] = *pd++;
-		tmp.uc[3] = *pd++;
+		tmp.uc[0] = *ps++;
+		tmp.uc[1] = *ps++;
+		tmp.uc[2] = *ps++;
+		tmp.uc[3] = *ps++;
 		*p++ = tmp.ud;
 		xlen--;
 	}
 	if(len & 3) {
 		tmp.ud = *p;
-		tmp.uc[0] = pd[0];
+		tmp.uc[0] = ps[0];
 		if(len & 2) {
-			tmp.uc[1] = pd[1];
+			tmp.uc[1] = ps[1];
 			if(len & 1) {
-				tmp.uc[2] = pd[2];
+				tmp.uc[2] = ps[2];
 			}
 		}
 		*p = tmp.ud;
-	}
+	} 
+}
+
+bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *ps, uint32 len)
+{
+	if (addr + len > eraminfo.size) return false;
+	copy_s1d4((void *)((uint32)eraminfo.base + addr), ps, len);
 	return true;
 }
 

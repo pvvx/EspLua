@@ -845,11 +845,17 @@ s32_t SPIFFS_size(spiffs *fs, spiffs_file fh) {
 }
 
 #if SPIFFS_TEST_VISUALISATION
+
+extern uint32 phy_get_mactime(void);
+extern void pp_soft_wdt_stop(void);
+extern void pp_soft_wdt_stop(void);
+
 s32_t SPIFFS_vis(spiffs *fs) {
   s32_t res = SPIFFS_OK;
   SPIFFS_API_CHECK_MOUNT(fs);
   SPIFFS_LOCK(fs);
-
+  uint32 t = phy_get_mactime();
+  pp_soft_wdt_stop();
   int entries_per_page = (SPIFFS_CFG_LOG_PAGE_SZ(fs) / sizeof(spiffs_obj_id));
   spiffs_obj_id *obj_lu_buf = (spiffs_obj_id *)fs->lu_work;
   spiffs_block_ix bix = 0;
@@ -887,6 +893,7 @@ s32_t SPIFFS_vis(spiffs *fs) {
         }
       } // per entry
       obj_lookup_page++;
+
     } // per object lookup page
 
     spiffs_obj_id erase_count;
@@ -902,8 +909,16 @@ s32_t SPIFFS_vis(spiffs *fs) {
     }
 
     bix++;
+    uint32 tn = phy_get_mactime();
+    if(tn-t > 1000000) {
+    	pp_soft_wdt_stop();
+    	tn=t;
+    }
+
   } // per block
 
+  spiffs_printf("phys_addr:   %p\n", fs->cfg.phys_addr);
+  spiffs_printf("phys_size:   %i\n", fs->cfg.phys_size);
   spiffs_printf("era_cnt_max: %i\n", fs->max_erase_count);
   spiffs_printf("last_errno:  %i\n", fs->err_code);
   spiffs_printf("blocks:      %i\n", fs->block_count);
@@ -913,7 +928,7 @@ s32_t SPIFFS_vis(spiffs *fs) {
   u32_t total, used;
   SPIFFS_info(fs, &total, &used);
   spiffs_printf("used:        %i of %i\n", used, total);
-
+  pp_soft_wdt_restart();
   SPIFFS_UNLOCK(fs);
   return res;
 }

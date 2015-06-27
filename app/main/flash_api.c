@@ -246,5 +246,62 @@ SpiFlashOpResult ICACHE_RAM_ATTR flash_safe_write(uint32 des_addr, uint8 *src_ad
 	return ret;
 }
 
+char * flash_strcpy(char * pd_, void * ps, uint32 len);
 
+extern char print_mem_buf[256];
+
+const char *flash_str2buf(const char * ps)
+{
+	return (const char *)flash_strcpy(print_mem_buf, (void *) ps, sizeof(print_mem_buf));
+}
+
+char * __attribute__((optimize("Os"))) ICACHE_RAM_ATTR flash_strcpy(char * pd_, void * ps, uint32 len)
+{
+	union {
+		uint8 uc[4];
+		uint32 ud;
+	}tmp;
+	char * pd = pd_;
+	pd[len] = 0;
+	uint32 *p = (uint32 *)((uint32)ps & (~3));
+	char c;
+
+	uint32 xlen = (uint32)ps & 3;
+	if(xlen) {
+		tmp.ud = *p++;
+		while (len)  {
+			len--;
+			c = *pd++ = tmp.uc[xlen++];
+			if(c == 0) return pd_;
+			if(xlen & 4) break;
+		}
+	}
+	xlen = len >> 2;
+	while(xlen) {
+		tmp.ud = *p++;
+		c = *pd++ = tmp.uc[0];
+		if(c == 0) return pd_;
+		c = *pd++ = tmp.uc[1];
+		if(c == 0) return pd_;
+		c = *pd++ = tmp.uc[2];
+		if(c == 0) return pd_;
+		c = *pd++ = tmp.uc[3];
+		if(c == 0) return pd_;
+		xlen--;
+	}
+	if(len & 3) {
+		tmp.ud = *p;
+		c = pd[0] = tmp.uc[0];
+		if(c == 0) return pd_;
+		if(len & 2) {
+			c = pd[1] = tmp.uc[1];
+			if(c == 0) return pd_;
+			if(len & 1) {
+				c = pd[2] = tmp.uc[2];
+				if(c == 0) return pd_;
+			}
+		}
+	}
+	return pd_;
+}
 

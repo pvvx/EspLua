@@ -77,12 +77,15 @@ typedef enum {
 #define DMEM_ATTR __attribute__((section(".bss")))
 #define SHMEM_ATTR
 
-#ifdef ICACHE_FLASH
+#ifndef ICACHE_FLASH_ATTR
 #define ICACHE_FLASH_ATTR __attribute__((section(".irom0.text")))
+#endif
+#ifndef ICACHE_RODATA_ATTR
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
-#else
-#define ICACHE_FLASH_ATTR
-#endif /* ICACHE_FLASH */
+#endif
+#ifndef ICACHE_STORE_ATTR
+#define ICACHE_STORE_ATTR  __attribute__((aligned(4)))
+#endif
 
 #ifndef __cplusplus
 typedef unsigned char   bool;

@@ -75,7 +75,7 @@ LUALIB_API void (luaL_where) (lua_State *L, int lvl);
 LUALIB_API int (luaL_error_) (lua_State *L, const char *fmt, ...);
 
 #define luaL_error(a, fmt, ...) do {	\
-	static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
+	static const char flash_str[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = fmt;	\
 	luaL_error_(a, flash_str, ##__VA_ARGS__);	\
 	} while(0)
 

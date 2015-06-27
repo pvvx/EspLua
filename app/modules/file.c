@@ -305,6 +305,13 @@ static int file_write( lua_State* L )
   return 1;
 }
 
+// Lua: fsstat()
+static int file_fsstat( lua_State* L )
+{
+  SPIFFS_vis(&fs);
+  return 0;
+}
+
 // Lua: writeline("string")
 static int file_writeline( lua_State* L )
 {
@@ -349,6 +356,7 @@ const LUA_REG_TYPE file_map[] =
   // { LSTRKEY( "check" ), LFUNCVAL( file_check ) },
   { LSTRKEY( "rename" ), LFUNCVAL( file_rename ) },
   { LSTRKEY( "fsinfo" ), LFUNCVAL( file_fsinfo ) },
+  { LSTRKEY( "fsstat" ), LFUNCVAL( file_fsstat ) },
 #endif
   
 #if LUA_OPTIMIZE_MEMORY > 0

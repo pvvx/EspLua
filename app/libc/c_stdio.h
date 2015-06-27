@@ -65,7 +65,8 @@ void c_sprintf(char* s,char *fmt, ...);
 
 // #define c_vsprintf ets_vsprintf
 #define c_printf(fmt, ...) do {	\
-	static const char flash_str[] __attribute__((section(".irom.text"))) = fmt; \
+	static const char flash_str[] __attribute__((aligned(4))) \
+	__attribute__((section(".irom.text"))) = fmt; \
 	unsigned char __print_buf[256];		\
 	c_sprintf(__print_buf, (char *)flash_str, ##__VA_ARGS__);	\
 	c_puts(__print_buf);					\

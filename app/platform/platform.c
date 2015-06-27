@@ -464,7 +464,7 @@ bool test_system_stack(void)
 	uint32 i;
 	register uint32 *p = &i;
 	if(stack_low != 0x5555AAAA || &i <= &stack_low)  {
-		register uint32 *x = (uint32 *)0x3FFFDFF0; // low 0x3FFFDFF0 = buffers gpio_register_set() !!!
+		register uint32 *x = (uint32 *)0x3FFFE0F0; // low 0x3FFFDFF0 = buffers gpio_register_set() !!!
 		while(*x == 0) x++;
 		if(x < p) p = x;
 		ets_printf("System stack overflow (Low %p)!\n", p);

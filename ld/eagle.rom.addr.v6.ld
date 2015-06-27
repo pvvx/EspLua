@@ -363,7 +363,7 @@ PROVIDE ( dtm_params = 0x3FFFDD64 );
 
 PROVIDE ( timer_list = 0x3FFFDDB0 );
 
-PROVIDE ( print_mem_buf = 0x3FFFDCE0 );
+PROVIDE ( print_mem_buf = 0x3FFFDFF0 );
 PROVIDE	( stack_low = 0x3FFFEB2C );
 
 /*

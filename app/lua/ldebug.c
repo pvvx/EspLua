@@ -638,7 +638,6 @@ void luaG_errormsg (lua_State *L) {
   luaD_throw(L, LUA_ERRRUN);
 }
 
-
 void luaG_runerror_ (lua_State *L, const char *fmt, ...) {
   va_list argp;
   va_start(argp, fmt);

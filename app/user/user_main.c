@@ -77,7 +77,7 @@ void nodemcu_init(void)
 
     // myspiffs_format();
 #ifdef DEVELOP_VERSION
-    // test_spiffs();
+    test_spiffs();
 #endif
     // endpoint_setup();
 
@@ -119,7 +119,7 @@ void user_init(void)
      flash_size_init();
     os_printf("Real Flash size: %u bytes.\n", flash_size);
 #ifndef NODE_DEBUG
-     system_set_os_print(0);
+     //system_set_os_print(0);
 #endif
     system_init_done_cb(nodemcu_init);
 }

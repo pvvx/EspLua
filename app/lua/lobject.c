@@ -109,12 +109,11 @@ static void pushstr (lua_State *L, const char *str) {
   incr_top(L);
 }
 
-extern char *print_mem_buf;
-extern const char *ets_strcpy(char *to, const char *from);
+extern const char *flash_str2buf(const char * ps);
 
 /* this function handles only `%d', `%c', %f, %p, and `%s' formats */
 const char *luaO_pushvfstring (lua_State *L, const char *fmt_, va_list argp) {
-  const char * fmt =(fmt_ >= (const char *)0x40200000)? ets_strcpy(print_mem_buf, fmt_) : fmt_;
+  const char * fmt =((unsigned int)fmt_ >= 0x40200000)? flash_str2buf(fmt_) : fmt_;
   int n = 1;
   pushstr(L, "");
   for (;;) {

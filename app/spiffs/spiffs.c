@@ -23,6 +23,9 @@ static s32_t my_spiffs_write(u32_t addr, u32_t size, u8_t *src) {
 	return SPIFFS_OK;
 }
 
+extern void pp_soft_wdt_stop(void);
+extern void pp_soft_wdt_stop(void);
+
 static s32_t my_spiffs_erase(u32_t addr, u32_t size) {
 //	if(addr >> 24) addr -= INTERNAL_FLASH_START_ADDRESS;
   u32_t sect_first = addr >> 12;
@@ -189,12 +192,12 @@ size_t myspiffs_size( int fd ){
   return SPIFFS_size(&fs, (spiffs_file)fd);
 }
 
-#if 1
+#ifdef DEVELOP_VERSION
 void test_spiffs() {
   char buf[20];
   
   // Surely, I've mounted spiffs before entering here
-  myspiffs_format();
+  // myspiffs_format();
   
   spiffs_file fd = SPIFFS_open(&fs, "init.lua", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
   if (SPIFFS_write(&fs, fd, (u8_t *)"print(node.heap());\n", 20) < 0) NODE_DBG("errno %i\n", SPIFFS_errno(&fs));

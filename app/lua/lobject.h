@@ -541,14 +541,8 @@ LUAI_FUNC int luaO_int2fb (unsigned int x);
 LUAI_FUNC int luaO_fb2int (int x);
 LUAI_FUNC int luaO_rawequalObj (const TValue *t1, const TValue *t2);
 LUAI_FUNC int luaO_str2d (const char *s, lua_Number *result);
-LUAI_FUNC const char *luaO_pushvfstring (lua_State *L, const char *fmt,
-                                                       va_list argp);
+LUAI_FUNC const char *luaO_pushvfstring (lua_State *L, const char *fmt, va_list argp);
 LUAI_FUNC const char *luaO_pushfstring (lua_State *L, const char *fmt, ...);
-/*
-#define luaO_pushfstring(a, fmt, ...) do {	\
-	static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-	luaO_pushfstring_(a, flash_str, ##__VA_ARGS__);	\
-	} while(0) */
 LUAI_FUNC void luaO_chunkid (char *out, const char *source, size_t len);
 
 
