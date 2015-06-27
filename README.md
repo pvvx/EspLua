@@ -18,16 +18,16 @@
 
 # Журнал версий
 
-2015-06-25<br />
-Начало проекта<br />
+2015-06-27 - Исправления/дополнения + новая команда file.fsstat()<br />
+2015-06-25 - Начало проекта<br />
 
 #Стартовый лог
 
 ```lua
-EspLua.ru 1.1.2 build 20150626  powered by Lua 5.1.4
-Hello, world.
-> print("heap:", node.heap())
-heap:	19032
+EspLua.ru 1.1.2 build 20150627  powered by Lua 5.1.4
+lua: cannot open init.lua
+> =node.heap()
+19968
 ```
 
 
