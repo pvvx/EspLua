@@ -109,7 +109,7 @@ static int db_getinfo (lua_State *L) {
     }
   }
   else if (lua_isfunction(L, arg+1) || lua_islightfunction(L, arg+1)) {
-    lua_pushfstring(L, ">%s", options);
+    lua_pushfstring_(L, ">%s", options);
     options = lua_tostring(L, -1);
     lua_pushvalue(L, arg+1);
     lua_xmove(L, L1, 1);
@@ -361,18 +361,18 @@ static int db_errorfb (lua_State *L) {
     }
     lua_pushliteral(L, "\n\t");
     lua_getinfo(L1, "Snl", &ar);
-    lua_pushfstring(L, "%s:", ar.short_src);
+    lua_pushfstring_(L, "%s:", ar.short_src);
     if (ar.currentline > 0)
-      lua_pushfstring(L, "%d:", ar.currentline);
+      lua_pushfstring_(L, "%d:", ar.currentline);
     if (*ar.namewhat != '\0')  /* is there a name? */
-        lua_pushfstring(L, " in function " LUA_QS, ar.name);
+        lua_pushfstring_(L, " in function " LUA_QS, ar.name);
     else {
       if (*ar.what == 'm')  /* main? */
-        lua_pushfstring(L, " in main chunk");
+        lua_pushfstring_(L, " in main chunk");
       else if (*ar.what == 'C' || *ar.what == 't')
         lua_pushliteral(L, " ?");  /* C function or tail call */
       else
-        lua_pushfstring(L, " in function <%s:%d>",
+        lua_pushfstring_(L, " in function <%s:%d>",
                            ar.short_src, ar.linedefined);
     }
     lua_concat(L, lua_gettop(L) - arg);

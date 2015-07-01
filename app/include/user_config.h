@@ -5,7 +5,7 @@
 	#define USE_US_TIMER
 #endif
 
-#define SDK_VERSION 1119   // 1119 = 1.1.1 release 
+#define SDK_VERSION 1129   // 1119 = 1.1.2 release
 #define DEBUGSOO 1
 #define USE_PVV_SPIFLASH 1
 #define USE_MAX_IRAM 48k

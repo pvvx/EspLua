@@ -33,6 +33,8 @@ SUBDIRS=    \
 	smart 	\
 	modules	\
 	spiffs	\
+	crypto	\
+	dhtlib	\
 	libc 	\
 	cjson
 
@@ -82,6 +84,8 @@ COMPONENTS_eagle.app.v6 = \
 	smart/smart.a 	\
 	spiffs/spiffs.a 	\
 	cjson/libcjson.a 	\
+	crypto/libcrypto.a	\
+	dhtlib/libdhtlib.a	\
 	libc/liblibc.a 	\
 	modules/libmodules.a
 

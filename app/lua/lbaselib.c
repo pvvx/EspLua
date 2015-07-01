@@ -433,7 +433,7 @@ static int luaB_tostring (lua_State *L) {
       lua_pushliteral(L, "nil");
       break;
     default:
-      lua_pushfstring(L, "%s: %p", luaL_typename(L, 1), lua_topointer(L, 1));
+      lua_pushfstring_(L, "%s: %p", luaL_typename(L, 1), lua_topointer(L, 1));
       break;
   }
   return 1;
@@ -580,7 +580,7 @@ static int auxresume (lua_State *L, lua_State *co, int narg) {
   if (!lua_checkstack(co, narg))
     luaL_error(L, "too many arguments to resume");
   if (status != CO_SUS) {
-    lua_pushfstring(L, "cannot resume %s coroutine", statnames[status]);
+    lua_pushfstring_(L, "cannot resume %s coroutine", statnames[status]);
     return -1;  /* error flag */
   }
   lua_xmove(L, co, narg);

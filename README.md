@@ -1,6 +1,9 @@
 # **EspLua.ru** #
 Версия 1.1.2
 
+Проект в стадии разработки.
+На текущий момент содержит версии только для тестов.
+
 ###Lua для Wi-Fi модулей esp8266
 Построен на частях от [ESP8266 sdk 1.1.2 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
 Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
@@ -18,16 +21,19 @@
 
 # Журнал версий
 
+2015-07-01 - новые команды wifi.sta.rssi() и wifi.max_tpw()<br />
 2015-06-27 - Исправления/дополнения + новая команда file.fsstat()<br />
 2015-06-25 - Начало проекта<br />
 
 #Стартовый лог
 
 ```lua
-EspLua.ru 1.1.2 build 20150627  powered by Lua 5.1.4
+EspLua.ru 1.1.2 build 20150701  powered by Lua 5.1.4
 lua: cannot open init.lua
 > =node.heap()
-19968
+20168
+> = wifi.sta.rssi()
+-28
 ```
 
 

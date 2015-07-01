@@ -15,6 +15,7 @@
 #include "c_stdio.h"
 
 #include "user_interface.h"
+#include "user_exceptions.h"
 
 #include "ets_sys.h"
 #include "driver/uart.h"
@@ -54,11 +55,13 @@ extern void spiffs_mount();
 
 void user_rf_pre_init(void)
 {
+//   _xtos_set_exception_handler( EXCCAUSE_LOAD_STORE_ERROR, load_non_32_wide_handler);
 	/* volatile */ uint32 * ptr_reg_rtc_ram = (/* volatile */ uint32 *)0x60001000;
 	if((ptr_reg_rtc_ram[24] >> 16) > 4) {
 		ptr_reg_rtc_ram[24] &= 0xFFFF;
 		ptr_reg_rtc_ram[30] = 0;
 	}
+	
 }
 
 void nodemcu_init(void)

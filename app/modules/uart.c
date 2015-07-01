@@ -36,11 +36,8 @@ static int uart_on( lua_State* L )
   uint8_t stack = 1;
   const char *method = luaL_checklstring( L, stack, &sl );
   stack++;
-  if (method == NULL) {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
-    
+  if (method == NULL)
+    { luaL_error( L, "wrong arg type" ); return 0; }
 
   if( lua_type( L, stack ) == LUA_TNUMBER )
   {
@@ -50,7 +47,7 @@ static int uart_on( lua_State* L )
     if( need_len > 255 ){
       need_len = 255;
       luaL_error( L, "wrong arg range" );
-      return 0;
+      return  0;
     }
   }
   else if(lua_isstring(L, stack))
@@ -91,7 +88,7 @@ static int uart_on( lua_State* L )
   }else{
     lua_pop(L, 1);
     luaL_error( L, "method not supported" );
-    return 0;
+    return  0;
   }
   return 0; 
 }
@@ -137,10 +134,8 @@ static int uart_write( lua_State* L )
     if( lua_type( L, s ) == LUA_TNUMBER )
     {
       len = lua_tointeger( L, s );
-      if( len > 255 ) {
-        luaL_error( L, "invalid number" );
-        return 0;
-      }
+      if( len > 255 )
+        { luaL_error( L, "invalid number" ); return  0; }
       platform_uart_send( id, ( u8 )len );
     }
     else

@@ -31,7 +31,7 @@ LUAI_FUNC int luaG_ordererror (lua_State *L, const TValue *p1,
 LUAI_FUNC void luaG_runerror_ (lua_State *L, const char *fmt, ...);
 #define luaG_runerror(a, fmt, ...) do {	\
 	static const char flash_str[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = fmt;	\
-	luaG_runerror_(a, fmt, ##__VA_ARGS__);	\
+	luaG_runerror_(a, flash_str, ##__VA_ARGS__);	\
 	} while(0)
 // luaG_runerror_(a, flash_str2buf(flash_str), ##__VA_ARGS__);	\
 

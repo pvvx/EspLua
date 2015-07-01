@@ -44,11 +44,8 @@ static int node_deepsleep( lua_State* L )
   if ( lua_isnumber(L, 2) )
   {
     option = lua_tointeger(L, 2);
-    if ( option < 0 || option > 4) {
-	    luaL_error( L, "wrong arg range" );
-	    return 0;
-    }
-      
+    if ( option < 0 || option > 4)
+      { luaL_error( L, "wrong arg range" ); return 0; }
     else
       deep_sleep_set_option( option );
   }
@@ -57,10 +54,8 @@ static int node_deepsleep( lua_State* L )
   {
     us = lua_tointeger(L, 1);
     // if ( us <= 0 )
-    if ( us < 0 ) {
-    	luaL_error( L, "wrong arg range" );
-		return 0;
-    }
+    if ( us < 0 )
+      { luaL_error( L, "wrong arg range" ); return  0; }
     else
       system_deep_sleep( us );
   }
@@ -73,8 +68,8 @@ static int node_deepsleep( lua_State* L )
 // {
 //   s32 option;
 //   option = luaL_checkinteger( L, 1 );
-//   if ( option < 0 || option > 4) {
-//     luaL_error( L, "wrong arg range" ); return 0; }
+//   if ( option < 0 || option > 4)
+//     return luaL_error( L, "wrong arg range" );
 //   else
 //    deep_sleep_set_option( option );
 //   return 0;
@@ -89,8 +84,6 @@ static int node_info( lua_State* L )
   lua_pushinteger(L, system_get_chip_id());   // chip id
   lua_pushinteger(L, spi_flash_get_id());     // flash id
   lua_pushinteger(L, flash_size / 1024);  // flash size in KB
-//  lua_pushinteger(L, flash_rom_get_mode());
-//  lua_pushinteger(L, flash_rom_get_speed());
   return 6;
 }
 
@@ -101,13 +94,7 @@ static int node_chipid( lua_State* L )
   lua_pushinteger(L, id);
   return 1;
 }
-// Lua: readvdd33()
-static int node_readvdd33( lua_State* L )
-{
-  uint32_t vdd33 = readvdd33();
-  lua_pushinteger(L, vdd33);
-  return 1;
-}
+
 
 // Lua: flashid()
 static int node_flashid( lua_State* L )
@@ -120,10 +107,6 @@ static int node_flashid( lua_State* L )
 // Lua: flashsize()
 static int node_flashsize( lua_State* L )
 {
-  if (lua_type(L, 1) == LUA_TNUMBER)
-  {
-    flash_size = luaL_checkinteger(L, 1);
-  }
   lua_pushinteger( L, flash_size );
   return 1;
 }
@@ -162,7 +145,6 @@ static int node_led( lua_State* L )
       luaL_error( L, "wrong arg type" );
       return 0;
     }
-
   } else {
     high = LED_HIGH_COUNT_DEFAULT; // default to LED_HIGH_COUNT_DEFAULT
   }
@@ -220,9 +202,8 @@ static int node_key( lua_State* L )
   size_t sl;
 
   const char *str = luaL_checklstring( L, 1, &sl );
-  if (str == NULL) {
-    luaL_error( L, "wrong arg type" ); return 0; 
-  }
+  if (str == NULL)
+    { luaL_error( L, "wrong arg type" ); return 0; };
 
   if (sl == 5 && c_strcmp(str, "short") == 0) {
     ref = &short_key_ref;
@@ -349,17 +330,14 @@ static int node_compile( lua_State* L )
   int file_fd = FS_OPEN_OK - 1;
   size_t len;
   const char *fname = luaL_checklstring( L, 1, &len );
-  if ( len > FS_NAME_MAX_LENGTH ) {
-    luaL_error(L, "filename too long");
-    return 0;
-  }
+  if ( len > FS_NAME_MAX_LENGTH )
+   { luaL_error(L, "filename too long"); return 0; };
 
   char output[FS_NAME_MAX_LENGTH];
   c_strcpy(output, fname);
   // check here that filename end with ".lua".
-  if (len < 4 || (c_strcmp( output + len - 4, ".lua") != 0) ) {
-    luaL_error(L, "not a .lua file"); return 0;
-  }
+  if (len < 4 || (c_strcmp( output + len - 4, ".lua") != 0) )
+    { luaL_error(L, "not a .lua file"); return 0; };
 
   output[c_strlen(output) - 2] = 'c';
   output[c_strlen(output) - 1] = '\0';
@@ -367,7 +345,7 @@ static int node_compile( lua_State* L )
   NODE_DBG("\n");
   if (luaL_loadfsfile(L, fname) != 0) {
     luaL_error_(L, lua_tostring(L, -1));
-    return 0; 
+    return 0;
   }
 
   f = toproto(L, -1);
@@ -377,8 +355,8 @@ static int node_compile( lua_State* L )
   file_fd = fs_open(output, fs_mode2flag("w+"));
   if (file_fd < FS_OPEN_OK)
   {
-	 luaL_error(L, "cannot open/write to file");
-     return 0;
+    luaL_error(L, "cannot open/write to file");
+    return 0;
   }
 
   lua_lock(L);
@@ -419,6 +397,13 @@ static int node_setcpufreq(lua_State* L)
   return 1;
 }
 
+// Lua: code = bootreason()
+static int node_bootreason (lua_State *L)
+{
+  lua_pushnumber (L, rtc_get_reset_reason ());
+  return 1;
+}
+
 // Module function map
 #define MIN_OPT_LEVEL 2
 #include "lrodefs.h"
@@ -437,11 +422,13 @@ const LUA_REG_TYPE node_map[] =
 #endif
   { LSTRKEY( "input" ), LFUNCVAL( node_input ) },
   { LSTRKEY( "output" ), LFUNCVAL( node_output ) },
-  { LSTRKEY( "readvdd33" ), LFUNCVAL( node_readvdd33) },
+// Moved to adc module, use adc.readvdd33()  
+// { LSTRKEY( "readvdd33" ), LFUNCVAL( node_readvdd33) },
   { LSTRKEY( "compile" ), LFUNCVAL( node_compile) },
   { LSTRKEY( "CPU80MHZ" ), LNUMVAL( CPU80MHZ ) },
   { LSTRKEY( "CPU160MHZ" ), LNUMVAL( CPU160MHZ ) },
   { LSTRKEY( "setcpufreq" ), LFUNCVAL( node_setcpufreq) },
+  { LSTRKEY( "bootreason" ), LFUNCVAL( node_bootreason) },
 // Combined to dsleep(us, option)
 // { LSTRKEY( "dsleepsetoption" ), LFUNCVAL( node_deepsleep_setoption) },
 #if LUA_OPTIMIZE_MEMORY > 0

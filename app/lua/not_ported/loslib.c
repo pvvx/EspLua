@@ -29,7 +29,7 @@ static int os_pushresult (lua_State *L, int i, const char *filename) {
   }
   else {
     lua_pushnil(L);
-    lua_pushfstring(L, "%s: %s", filename, strerror(en));
+    lua_pushfstring_(L, "%s: %s", filename, strerror(en));
     lua_pushinteger(L, en);
     return 3;
   }

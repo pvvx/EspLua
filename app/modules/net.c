@@ -87,7 +87,7 @@ static void net_server_disconnected(void *arg)    // for tcp server only
     if( (LUA_NOREF!=socket[i]) && (socket[i] == nud->self_ref) ){
       // found the saved client
       nud->pesp_conn->reverse = NULL;
-      nud->pesp_conn = NULL;    // the espconn is made by low level sdk, do not need to free, delete() will not free it.
+//      nud->pesp_conn = NULL;    // the espconn is made by low level sdk, do not need to free, delete() will not free it.
       nud->self_ref = LUA_NOREF;   // unref this, and the net.socket userdata will delete it self
       luaL_unref(gL, LUA_REGISTRYINDEX, socket[i]);
       socket[i] = LUA_NOREF;
@@ -113,13 +113,13 @@ static void net_socket_disconnected(void *arg)    // tcp only
     lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->self_ref);  // pass the userdata(client) to callback func in lua
     lua_call(gL, 1, 0);
   }
-
+/*
   if(pesp_conn->proto.tcp)
     c_free(pesp_conn->proto.tcp);
   pesp_conn->proto.tcp = NULL;
   if(nud->pesp_conn)
     c_free(nud->pesp_conn);
-  nud->pesp_conn = NULL;  // espconn is already disconnected
+  nud->pesp_conn = NULL;  // espconn is already disconnected */
   lua_gc(gL, LUA_GCSTOP, 0);
   if(nud->self_ref != LUA_NOREF){
     luaL_unref(gL, LUA_REGISTRYINDEX, nud->self_ref);
