@@ -1,13 +1,14 @@
 /*
- * iram_buf.c
- *
- *      Author: pvvx
+ * FileName: iram_buf.c
+ * Description: Alternate SDK (main.a)
+ * (c) pvvx 2015
  */
 #include "user_config.h"
 #include "bios.h"
 #include "sdk/osapi.h"
 #include "sdk/add_sdk_func.h"
 #include "hw/esp8266.h"
+#include "rom2ram.h"
 #include "iram_buf.h"
 
 #ifndef DEBUGSOO
@@ -97,43 +98,7 @@ void  eram_init(void) {
 	}
 }
 
-void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s4d1(uint8 * pd, void * ps, uint32 len)
-{
-	union {
-		uint8 uc[4];
-		uint32 ud;
-	}tmp;
-	uint32 *p = (uint32 *)((uint32)ps & (~3));
-	
-	uint32 xlen = (uint32)ps & 3;
-	if(xlen) {
-		tmp.ud = *p++;
-		while (len)  {
-			len--;
-			*pd++ = tmp.uc[xlen++];
-			if(xlen & 4) break;
-		}
-	}
-	xlen = len >> 2;
-	while(xlen) {
-		tmp.ud = *p++;
-		*pd++ = tmp.uc[0];
-		*pd++ = tmp.uc[1];
-		*pd++ = tmp.uc[2];
-		*pd++ = tmp.uc[3];
-		xlen--;
-	}
-	if(len & 3) {
-		tmp.ud = *p;
-		pd[0] = tmp.uc[0];
-		if(len & 2) {
-			pd[1] = tmp.uc[1];
-			if(len & 1) {
-				pd[2] = tmp.uc[2];
-			}
-		}
-	}
-}
+//extern void copy_s4d1(uint8 * pd, void * ps, uint32 len);
 
 bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
 {
@@ -142,44 +107,7 @@ bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamRead(uint32 addr, uint
 	return true;
 }
 
-void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s1d4(void * pd, uint8 * ps, uint32 len)
-{
-	union {
-		uint8 uc[4];
-		uint32 ud;
-	}tmp;
-	uint32 *p = (uint32 *)(((uint32)pd) & (~3));
-	uint32 xlen = (uint32)pd & 3;
-	if(xlen) {
-		tmp.ud = *p;
-		while (len)  {
-			len--;
-			tmp.uc[xlen++] = *ps++;
-			if(xlen & 4) break;
-		}
-		*p++ = tmp.ud;
-	}
-	xlen = len >> 2;
-	while(xlen) {
-		tmp.uc[0] = *ps++;
-		tmp.uc[1] = *ps++;
-		tmp.uc[2] = *ps++;
-		tmp.uc[3] = *ps++;
-		*p++ = tmp.ud;
-		xlen--;
-	}
-	if(len & 3) {
-		tmp.ud = *p;
-		tmp.uc[0] = ps[0];
-		if(len & 2) {
-			tmp.uc[1] = ps[1];
-			if(len & 1) {
-				tmp.uc[2] = ps[2];
-			}
-		}
-		*p = tmp.ud;
-	} 
-}
+//extern void copy_s1d4(void * pd, uint8 * ps, uint32 len);
 
 bool  __attribute__((optimize("Os"))) ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *ps, uint32 len)
 {

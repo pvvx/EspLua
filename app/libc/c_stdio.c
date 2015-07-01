@@ -570,7 +570,7 @@ extern const char *flash_str2buf(const char * ps);
 int 
 vsprintf (char *d, const char *s_, va_list ap)
 {
-   const char * s =((unsigned int)s_ >= 0x40200000)? flash_str2buf(s_) : s_;
+   const char * s =((unsigned int)s_ >> 30)? flash_str2buf(s_) : s_;
 
     const char *t;
     char *p, *dst, tmp[40];

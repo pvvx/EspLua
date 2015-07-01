@@ -1,6 +1,8 @@
-/******************************************************************************
- * PV` FileName: flash.c
- *******************************************************************************/
+/*
+ * FileName: spi_flash.c
+ * Description: Alternate SDK (main.a)
+ * (c) pvvx 2015
+ */
 
 #include "user_config.h"
 #include "bios.h"

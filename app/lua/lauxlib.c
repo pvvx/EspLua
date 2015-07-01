@@ -12,6 +12,8 @@
 #include "c_stdlib.h"
 #include "c_string.h"
 #include "flash_fs.h"
+#include "rom2ram.h"
+
 
 /* This file uses only the official API of Lua.
 ** Any function declared here could be written as an application function.

@@ -4,11 +4,14 @@
 ** See Copyright Notice in lua.h
 */
 
+#include "user_config.h"
 #include "c_ctype.h"
 #include "c_stdarg.h"
 #include "c_stdio.h"
 #include "c_stdlib.h"
 #include "c_string.h"
+
+#include "rom2ram.h"
 
 #define lobject_c
 #define LUA_CORE
@@ -109,19 +112,26 @@ static void pushstr (lua_State *L, const char *str) {
   incr_top(L);
 }
 
-extern const char *flash_str2buf(const char * ps);
-
 /* this function handles only `%d', `%c', %f, %p, and `%s' formats */
-const char *luaO_pushvfstring (lua_State *L, const char *fmt_, va_list argp) {
-  const char * fmt =((unsigned int)fmt_ >= 0x40200000)? flash_str2buf(fmt_) : fmt_;
+  const char *luaO_pushvfstring (lua_State *L, const char *fmt, va_list argp) {
   int n = 1;
   pushstr(L, "");
   for (;;) {
-    const char *e = c_strchr(fmt, '%');
+#ifndef USE_ROM_STRINGS
+	const char *e = c_strchr(fmt, '%');
+#else
+	const char *e = rom_strchr((void *)fmt, '%');
+#endif
     if (e == NULL) break;
     setsvalue2s(L, L->top, luaS_newlstr(L, fmt, e-fmt));
     incr_top(L);
+
+#ifndef USE_ROM_STRINGS
     switch (*(e+1)) {
+#else
+    char x = get_rom_chr(&e[1]);
+    switch (x) {
+#endif
       case 's': {
         const char *s = va_arg(argp, char *);
         if (s == NULL) s = "(null)";
@@ -158,7 +168,11 @@ const char *luaO_pushvfstring (lua_State *L, const char *fmt_, va_list argp) {
       default: {
         char buff[3];
         buff[0] = '%';
+#ifndef USE_ROM_STRINGS
         buff[1] = *(e+1);
+#else
+        buff[1] = x;
+#endif
         buff[2] = '\0';
         pushstr(L, buff);
         break;
