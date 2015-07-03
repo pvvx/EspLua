@@ -563,15 +563,12 @@ gethex(int32_t *vp, char *p, int n)
 #include "c_string.h"
 #include "c_ctype.h"
 
-extern const char *flash_str2buf(const char * ps);
 /*
  *  int vsprintf(d,s,ap)
  */
 int 
-vsprintf (char *d, const char *s_, va_list ap)
+vsprintf (char *d, const char *s, va_list ap)
 {
-   const char * s =((unsigned int)s_ >> 30)? flash_str2buf(s_) : s_;
-
     const char *t;
     char *p, *dst, tmp[40];
     unsigned int n;
@@ -1097,8 +1094,6 @@ exponent(char *p, int exp, int fmtch)
 }
 #endif /* FLOATINGPT */
 
-//extern char print_mem_buf[1820]; // 0x3FFFE364..0x3FFFEA80
-//extern char *ets_strcpy(char *to, const char *from);
 
 void c_sprintf(char *s, char *fmt, ...)
 {

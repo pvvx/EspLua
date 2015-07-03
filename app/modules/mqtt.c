@@ -556,7 +556,7 @@ static int mqtt_socket_client( lua_State* L )
   lmqtt_userdata *mud;
   char tempid[20] = {0};
   c_sprintf(tempid, "%s%x", "NodeMCU_", system_get_chip_id() );
-  NODE_DBG_(tempid);
+  NODE_DBG(tempid);
   NODE_DBG("\n");
   
   const char *clientId = tempid, *username = NULL, *password = NULL;
@@ -644,8 +644,7 @@ static int mqtt_socket_client( lua_State* L )
       c_free(mud->connect_info.password);
       mud->connect_info.password = NULL;
     }
-  	luaL_error(L, "not enough memory");
-  	return 0;
+  	return luaL_error(L, "not enough memory");
   }
 
   c_memcpy(mud->connect_info.client_id, clientId, idl);
@@ -837,8 +836,7 @@ static int mqtt_socket_connect( lua_State* L )
     return 0;
 
   if(mud->connected){
-    luaL_error(L, "already connected");
-    return 0;
+    return luaL_error(L, "already connected");
   }
 
   if(mud->pesp_conn){   //TODO: should I free tcp struct directly or ask user to call close()???
@@ -853,14 +851,14 @@ static int mqtt_socket_connect( lua_State* L )
   struct espconn *pesp_conn = NULL;
 	pesp_conn = mud->pesp_conn = (struct espconn *)c_zalloc(sizeof(struct espconn));
 	if(!pesp_conn)
-		{ luaL_error(L, "not enough memory"); return 0; }
+		return luaL_error(L, "not enough memory");
 
 	pesp_conn->proto.udp = NULL;
 	pesp_conn->proto.tcp = (esp_tcp *)c_zalloc(sizeof(esp_tcp));
 	if(!pesp_conn->proto.tcp){
 		c_free(pesp_conn);
 		pesp_conn = mud->pesp_conn = NULL;
-		{ luaL_error(L, "not enough memory"); return 0; }
+		return luaL_error(L, "not enough memory");
 	}
 	// reverse is for the callback function
 	pesp_conn->reverse = mud;
@@ -1004,7 +1002,7 @@ static int mqtt_socket_on( lua_State* L )
 
   const char *method = luaL_checklstring( L, 2, &sl );
   if (method == NULL)
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
 
   luaL_checkanyfunction(L, 3);
   lua_pushvalue(L, 3);  // copy argument (func) to the top of stack
@@ -1023,8 +1021,7 @@ static int mqtt_socket_on( lua_State* L )
     mud->cb_message_ref = luaL_ref(L, LUA_REGISTRYINDEX);
   }else{
     lua_pop(L, 1);
-    luaL_error( L, "method not supported" );
-    return 0;
+    return luaL_error( L, "method not supported" );
   }
   NODE_DBG("leave mqtt_socket_on.\n");
   return 0;
@@ -1250,16 +1247,14 @@ static int mqtt_socket_lwt( lua_State* L )
   lwtTopic = luaL_checklstring( L, stack, &topicSize );
   if (lwtTopic == NULL)
   {
-    luaL_error( L, "need lwt topic");
-    return 0;
+    return luaL_error( L, "need lwt topic");
   }
 
   stack++;
   lwtMsg = luaL_checklstring( L, stack, &msgSize );
   if (lwtMsg == NULL)
   {
-    luaL_error( L, "need lwt message");
-    return 0;
+    return luaL_error( L, "need lwt message");
   }
 
   if(mud->connect_info.will_topic){    // free the previous one if there is any
@@ -1282,8 +1277,7 @@ static int mqtt_socket_lwt( lua_State* L )
       c_free(mud->connect_info.will_message);
       mud->connect_info.will_message = NULL;
     }
-    luaL_error( L, "not enough memory");
-    return 0;
+    return luaL_error( L, "not enough memory");
   }
   c_memcpy(mud->connect_info.will_topic, lwtTopic, topicSize);
   mud->connect_info.will_topic[topicSize] = 0;

@@ -76,11 +76,11 @@ SECTIONS
     _irom0_text_start = ABSOLUTE(.);
     *(.irom0.literal .irom.literal .irom.text.literal .irom0.text .irom.text)
     *(.literal.* .text.*)
-    *(.rodata2.text)
-
+	
     /* put font and progmem data into irom0 */
     *(.u8g_progmem.*)
-
+/*    *(.rodata.str* .rodata.flash*) */
+    *(.rodata.u8g* )
     _irom0_text_end = ABSOLUTE(.);
     _flash_used_end = ABSOLUTE(.);
   } >irom0_0_seg :irom0_0_phdr
@@ -117,6 +117,9 @@ SECTIONS
     *(.init.literal)
     *(.init)
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+    
+    *(.rodata*)
+ 
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
@@ -153,8 +156,6 @@ SECTIONS
   .rodata : ALIGN(4)
   {
     _rodata_start = ABSOLUTE(.);
-    *(.rodata)
-    *(.rodata.*)
     *(.gnu.linkonce.r.*)
     *(.rodata1)
     __XT_EXCEPTION_TABLE__ = ABSOLUTE(.);
@@ -208,9 +209,7 @@ SECTIONS
     . = ALIGN (8);
     _bss_end = ABSOLUTE(.);
     _heap_start = ABSOLUTE(.);
-/*    _stack_sentry = ALIGN(0x8); */
   } >dram0_0_seg :dram0_0_bss_phdr
-/* __stack = 0x3ffc8000; */
 
 }
 

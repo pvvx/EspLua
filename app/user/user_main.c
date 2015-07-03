@@ -48,14 +48,10 @@ void task_init(void){
 }
 
 extern void spiffs_mount();
-// extern void test_spiffs();
-// extern int test_romfs();
 
-// extern uint16_t flash_get_sec_num();
 
 void user_rf_pre_init(void)
 {
-//   _xtos_set_exception_handler( EXCCAUSE_LOAD_STORE_ERROR, load_non_32_wide_handler);
 	/* volatile */ uint32 * ptr_reg_rtc_ram = (/* volatile */ uint32 *)0x60001000;
 	if((ptr_reg_rtc_ram[24] >> 16) > 4) {
 		ptr_reg_rtc_ram[24] &= 0xFFFF;
@@ -74,7 +70,6 @@ void nodemcu_init(void)
         NODE_DBG("Can not init platform for modules.\n");
         return;
     }
-
     
     spiffs_mount();
 
@@ -106,7 +101,7 @@ void user_init(void)
 #ifdef DEVELOP_VERSION
     uart_init(BIT_RATE_74880, BIT_RATE_74880);
 #else
-    uart_init(BIT_RATE_9600, BIT_RATE_9600);
+    uart_init(BIT_RATE_74880, BIT_RATE_74880);
     // uart_init(BIT_RATE_115200, BIT_RATE_115200);
 #endif
 	stack_low = 0x5555AAAA;

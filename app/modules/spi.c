@@ -19,13 +19,22 @@ static int spi_setup( lua_State *L )
 
   MOD_CHECK_ID( spi, id );
 
-  if ((mode != PLATFORM_SPI_SLAVE && mode != PLATFORM_SPI_MASTER) 
-  || (cpol != PLATFORM_SPI_CPOL_LOW && cpol != PLATFORM_SPI_CPOL_HIGH)
-  || (cpha != PLATFORM_SPI_CPHA_LOW && cpha != PLATFORM_SPI_CPHA_HIGH)
-  || (databits != PLATFORM_SPI_DATABITS_8 && databits != PLATFORM_SPI_DATABITS_16)) {
-    luaL_error( L, "wrong arg type" );
-    return 0;
+  if (mode != PLATFORM_SPI_SLAVE && mode != PLATFORM_SPI_MASTER) {
+    return luaL_error( L, "wrong arg type" );
   }
+
+  if (cpol != PLATFORM_SPI_CPOL_LOW && cpol != PLATFORM_SPI_CPOL_HIGH) {
+    return luaL_error( L, "wrong arg type" );
+  }
+
+  if (cpha != PLATFORM_SPI_CPHA_LOW && cpha != PLATFORM_SPI_CPHA_HIGH) {
+    return luaL_error( L, "wrong arg type" );
+  }
+
+  if (databits != PLATFORM_SPI_DATABITS_8 && databits != PLATFORM_SPI_DATABITS_16) {
+    return luaL_error( L, "wrong arg type" );
+  }
+
   u32 res = platform_spi_setup(id, mode, cpol, cpha, databits, clock);
   lua_pushinteger( L, res );
   return 1;
@@ -43,11 +52,8 @@ static int spi_send( lua_State *L )
   unsigned argn;
 
   MOD_CHECK_ID( spi, id );
-  if( lua_gettop( L ) < 2 ) {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
-    
+  if( lua_gettop( L ) < 2 )
+    return luaL_error( L, "wrong arg type" );
 
   for( argn = 2; argn <= lua_gettop( L ); argn ++ )
   {
@@ -56,10 +62,8 @@ static int spi_send( lua_State *L )
     if( lua_type( L, argn ) == LUA_TNUMBER )
     {
       numdata = ( int )luaL_checkinteger( L, argn );
-      if( numdata < 0 || numdata > 255 ) {
-        luaL_error( L, "wrong arg range" );
-        return 0;
-      }
+      if( numdata < 0 || numdata > 255 )
+        return luaL_error( L, "wrong arg range" );
       platform_spi_send_recv( id, numdata );
       wrote ++;
     }
@@ -71,11 +75,8 @@ static int spi_send( lua_State *L )
         lua_rawgeti( L, argn, i + 1 );
         numdata = ( int )luaL_checkinteger( L, -1 );
         lua_pop( L, 1 );
-        if( numdata < 0 || numdata > 255 ) {
-          luaL_error( L, "wrong arg range" );
-          return 0;
-        }
-          
+        if( numdata < 0 || numdata > 255 )
+          return luaL_error( L, "wrong arg range" );
         platform_spi_send_recv( id, numdata );
       }
       wrote += i;

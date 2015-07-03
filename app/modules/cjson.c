@@ -428,11 +428,8 @@ static int json_cfg_encode_keep_buffer(lua_State *l)
     /* Init / free the buffer if the setting has changed */
     if (old_value ^ cfg->encode_keep_buffer) {
         if (cfg->encode_keep_buffer){
-            if(-1==strbuf_init(&cfg->encode_buf, 0)) {
-	            luaL_error(l, "not enough memory");
-	            return 0;
-            }
-                 
+            if(-1==strbuf_init(&cfg->encode_buf, 0))
+                return luaL_error(l, "not enough memory");
         }
         else
             strbuf_free(&cfg->encode_buf);
@@ -879,11 +876,8 @@ static int json_encode(lua_State *l)
     if (!cfg->encode_keep_buffer) {
         /* Use private buffer */
         encode_buf = &local_encode_buf;
-        if(-1==strbuf_init(encode_buf, 0)) {
-	        luaL_error(l, "not enough memory");
-	        return 0;
-        }
-            
+        if(-1==strbuf_init(encode_buf, 0))
+            return luaL_error(l, "not enough memory");
     } else {
         /* Reuse existing buffer */
         encode_buf = &cfg->encode_buf;
@@ -1467,8 +1461,7 @@ static int json_decode(lua_State *l)
      * string must be smaller than the entire json string */
     json.tmp = strbuf_new(json_len);
     if(json.tmp == NULL){
-        luaL_error(l, "not enought memory");
-        return 0;
+        return luaL_error(l, "not enought memory");
     }
 
     json_next_token(&json, &token);
@@ -1532,8 +1525,7 @@ static int json_protect_conversion(lua_State *l)
 
     /* Since we are not using a custom error handler, the only remaining
      * errors are memory related */
-    luaL_error(l, "Memory allocation error in CJSON protected call");
-    return 0;
+    return luaL_error(l, "Memory allocation error in CJSON protected call");
 }
 #endif
 
@@ -1563,8 +1555,7 @@ LUALIB_API int luaopen_cjson( lua_State *L )
   /* Initialise number conversions */
   // fpconv_init();         // not needed for a specific cpu.
   if(-1==cfg_init(&_cfg)){
-    luaL_error(L, "BUG: Unable to init config for cjson");;
-    return 0;
+    return luaL_error(L, "BUG: Unable to init config for cjson");;
   }
 #if LUA_OPTIMIZE_MEMORY > 0
   return 0;

@@ -27,7 +27,9 @@ SpiFlashOpResult flash_safe_write(uint32 des_addr, uint8 *src_addr, uint32 size)
 
 void flash_size_init(void);
 
-uint8_t byte_of_aligned_array(const uint8_t* aligned_array, uint32_t index);
+#define byte_of_aligned_array(a,b) (uint8_t)get_rom_chr((void *)((unsigned int )a + (unsigned int )b))
+
+//uint8_t byte_of_aligned_array(const uint8_t* aligned_array, uint32_t index);
 
 extern uint32_t flash_size;
 

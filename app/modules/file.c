@@ -23,11 +23,8 @@ static int file_open( lua_State* L )
   }
 
   const char *fname = luaL_checklstring( L, 1, &len );
-  if( len > FS_NAME_MAX_LENGTH ) {
-	luaL_error(L, "filename too long");
-	return 0;
-  }
-     
+  if( len > FS_NAME_MAX_LENGTH )
+    return luaL_error(L, "filename too long");
   const char *mode = luaL_optstring(L, 2, "r");
 
   file_fd = fs_open(fname, fs_mode2flag(mode));
@@ -108,11 +105,8 @@ static int file_seek (lua_State *L)
 {
   static const int mode[] = {FS_SEEK_SET, FS_SEEK_CUR, FS_SEEK_END};
   static const char *const modenames[] = {"set", "cur", "end", NULL};
-  if((FS_OPEN_OK - 1)==file_fd) {
-	  luaL_error(L, "open a file first");
-	  return 0;
-  }
-     
+  if((FS_OPEN_OK - 1)==file_fd)
+    return luaL_error(L, "open a file first");
   int op = luaL_checkoption(L, 1, "cur", modenames);
   long offset = luaL_optlong(L, 2, 0);
   op = fs_seek(file_fd, offset, mode[op]);
@@ -128,10 +122,8 @@ static int file_remove( lua_State* L )
 {
   size_t len;
   const char *fname = luaL_checklstring( L, 1, &len );
-  if( len > FS_NAME_MAX_LENGTH ) {
-    luaL_error(L, "filename too long");
-    return 0;
-  } 
+  if( len > FS_NAME_MAX_LENGTH )
+    return luaL_error(L, "filename too long");
   file_close(L);
   SPIFFS_remove(&fs, (char *)fname);
   return 0;  
@@ -140,11 +132,8 @@ static int file_remove( lua_State* L )
 // Lua: flush()
 static int file_flush( lua_State* L )
 {
-  if((FS_OPEN_OK - 1)==file_fd) {
-	  luaL_error(L, "open a file first");
-	  return 0;
-  }
-    
+  if((FS_OPEN_OK - 1)==file_fd)
+    return luaL_error(L, "open a file first");
   if(fs_flush(file_fd) == 0)
     lua_pushboolean(L, 1);
   else
@@ -171,16 +160,12 @@ static int file_rename( lua_State* L )
   }
 
   const char *oldname = luaL_checklstring( L, 1, &len );
-  if( len > FS_NAME_MAX_LENGTH ) {
-	  luaL_error(L, "filename too long");
-	  return 0;
-  }
+  if( len > FS_NAME_MAX_LENGTH )
+    return luaL_error(L, "filename too long");
 
   const char *newname = luaL_checklstring( L, 2, &len );
-  if( len > FS_NAME_MAX_LENGTH ) {
-	  luaL_error(L, "filename too long");
-	  return 0;
-  }
+  if( len > FS_NAME_MAX_LENGTH )
+    return luaL_error(L, "filename too long");
 
   if(SPIFFS_OK==myspiffs_rename( oldname, newname )){
     lua_pushboolean(L, 1);
@@ -198,8 +183,7 @@ static int file_fsinfo( lua_State* L )
   NODE_DBG("total: %d, used:%d\n", total, used);
   if(total>0x7FFFFFFF || used>0x7FFFFFFF || used > total)
   {
-    luaL_error(L, "file system error");;
-    return 0;
+    return luaL_error(L, "file system error");;
   }
   lua_pushinteger(L, total-used);
   lua_pushinteger(L, used);
@@ -219,11 +203,8 @@ static int file_g_read( lua_State* L, int n, int16_t end_char )
   int ec = (int)end_char;
   
   luaL_Buffer b;
-  if((FS_OPEN_OK - 1)==file_fd) {
-	  luaL_error(L, "open a file first");
-	  return  0;
-  }
-    
+  if((FS_OPEN_OK - 1)==file_fd)
+    return luaL_error(L, "open a file first");
 
   luaL_buffinit(L, &b);
   char *p = luaL_prepbuffer(&b);
@@ -273,8 +254,7 @@ static int file_read( lua_State* L )
   {
     const char *end = luaL_checklstring( L, 1, &el );
     if(el!=1){
-      luaL_error( L, "wrong arg range" );
-      return 0;
+      return luaL_error( L, "wrong arg range" );
     }
     end_char = (int16_t)end[0];
   }
@@ -291,10 +271,8 @@ static int file_readline( lua_State* L )
 // Lua: write("string")
 static int file_write( lua_State* L )
 {
-  if((FS_OPEN_OK - 1)==file_fd) {
-	  luaL_error(L, "open a file first");
-	  return  0;
-  }
+  if((FS_OPEN_OK - 1)==file_fd)
+    return luaL_error(L, "open a file first");
   size_t l, rl;
   const char *s = luaL_checklstring(L, 1, &l);
   rl = fs_write(file_fd, s, l);
@@ -305,20 +283,11 @@ static int file_write( lua_State* L )
   return 1;
 }
 
-// Lua: fsstat()
-static int file_fsstat( lua_State* L )
-{
-  SPIFFS_vis(&fs);
-  return 0;
-}
-
 // Lua: writeline("string")
 static int file_writeline( lua_State* L )
 {
-  if((FS_OPEN_OK - 1)==file_fd) {
-	luaL_error(L, "open a file first");
-  	return 0;
-  }
+  if((FS_OPEN_OK - 1)==file_fd)
+    return luaL_error(L, "open a file first");
   size_t l, rl;
   const char *s = luaL_checklstring(L, 1, &l);
   rl = fs_write(file_fd, s, l);
@@ -335,6 +304,14 @@ static int file_writeline( lua_State* L )
   return 1;
 }
 
+// Lua: fsstat()
+static int file_fsstat( lua_State* L )
+{
+  SPIFFS_vis(&fs);
+  return 0;
+}
+
+
 // Module function map
 #define MIN_OPT_LEVEL 2
 #include "lrodefs.h"
@@ -348,8 +325,6 @@ const LUA_REG_TYPE file_map[] =
   { LSTRKEY( "read" ), LFUNCVAL( file_read ) },
   { LSTRKEY( "readline" ), LFUNCVAL( file_readline ) },
   { LSTRKEY( "format" ), LFUNCVAL( file_format ) },
-#if defined(BUILD_WOFS)
-#elif defined(BUILD_SPIFFS)
   { LSTRKEY( "remove" ), LFUNCVAL( file_remove ) },
   { LSTRKEY( "seek" ), LFUNCVAL( file_seek ) },
   { LSTRKEY( "flush" ), LFUNCVAL( file_flush ) },
@@ -357,7 +332,6 @@ const LUA_REG_TYPE file_map[] =
   { LSTRKEY( "rename" ), LFUNCVAL( file_rename ) },
   { LSTRKEY( "fsinfo" ), LFUNCVAL( file_fsinfo ) },
   { LSTRKEY( "fsstat" ), LFUNCVAL( file_fsstat ) },
-#endif
   
 #if LUA_OPTIMIZE_MEMORY > 0
 

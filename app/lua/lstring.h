@@ -11,20 +11,14 @@
 #include "lgc.h"
 #include "lobject.h"
 #include "lstate.h"
-#include "rom2ram.h"
 
 
 #define sizestring(s) (sizeof(union TString)+(luaS_isreadonly(s) ? sizeof(char **) : ((s)->len+1)*sizeof(char)))
 
 #define sizeudata(u)	(sizeof(union Udata)+(u)->len)
 
-#ifndef USE_ROM_STRINGS
 #define luaS_new(L, s)	(luaS_newlstr(L, s, c_strlen(s)))
 #define luaS_newro(L, s)  (luaS_newrolstr(L, s, c_strlen(s)))
-#else
-#define luaS_new(L, s)	(luaS_newlstr(L, s, rom_strlen(s)))
-#define luaS_newro(L, s)  (luaS_newrolstr(L, s, rom_strlen(s)))
-#endif
 #define luaS_newliteral(L, s)  (luaS_newlstr(L, "" s, \
                                   (sizeof(s)/sizeof(char))-1))
 

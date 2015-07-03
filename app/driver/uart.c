@@ -79,7 +79,7 @@ uart_tx_one_char(uint8 uart, uint8 TxChar)
     while (true)
     {
       uint32 fifo_cnt = READ_PERI_REG(UART_STATUS(uart)) & (UART_TXFIFO_CNT<<UART_TXFIFO_CNT_S);
-      if (((fifo_cnt >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) < 126) {
+      if ((fifo_cnt >> UART_TXFIFO_CNT_S & UART_TXFIFO_CNT) < 126) {
         break;
       }
     }
@@ -175,7 +175,7 @@ void ICACHE_FLASH_ATTR uart0_putc(const char c)
  * Parameters   : void *para - point to ETS_UART_INTR_ATTACH's arg
  * Returns      : NONE
 *******************************************************************************/
-LOCAL void ICACHE_RAM_ATTR
+LOCAL void
 uart0_rx_intr_handler(void *para)
 {
     /* uart0 and uart1 intr combine togther, when interrupt occur, see reg 0x3ff20020, bit2, bit0 represents

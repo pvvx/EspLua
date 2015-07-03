@@ -52,18 +52,12 @@ static int lgpio_trig( lua_State* L )
   
   pin = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( gpio, pin );
-  if(pin==0) {
-	  luaL_error( L, "no interrupt for D0" );
-	  return 0;
-  }
-    
+  if(pin==0)
+    return luaL_error( L, "no interrupt for D0" );
 
   const char *str = luaL_checklstring( L, 2, &sl );
-  if (str == NULL) {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
-    
+  if (str == NULL)
+    return luaL_error( L, "wrong arg type" );
 
   if(sl == 2 && c_strcmp(str, "up") == 0){
     type = GPIO_PIN_INTR_POSEDGE;
@@ -101,15 +95,10 @@ static int lgpio_mode( lua_State* L )
   pin = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( gpio, pin );
   mode = luaL_checkinteger( L, 2 );
-  if ( mode!=OUTPUT && mode!=INPUT && mode!=INTERRUPT) {
-      luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
-    
-  if(pin==0 && mode==INTERRUPT) {
-    luaL_error( L, "no interrupt for D0" );
-    return 0; 
-  }
+  if ( mode!=OUTPUT && mode!=INPUT && mode!=INTERRUPT)
+    return luaL_error( L, "wrong arg type" );
+  if(pin==0 && mode==INTERRUPT)
+    return luaL_error( L, "no interrupt for D0" );
   if(lua_isnumber(L, 3))
     pullup = lua_tointeger( L, 3 );
   if(pullup!=FLOAT)
@@ -124,10 +113,8 @@ static int lgpio_mode( lua_State* L )
   }
 #endif
   int r = platform_gpio_mode( pin, mode, pullup );
-  if( r<0 ) {
-    luaL_error( L, "wrong pin num." );
-    return 0;
-  }
+  if( r<0 )
+    return luaL_error( L, "wrong pin num." );
   return 0;  
 }
 
@@ -153,10 +140,8 @@ static int lgpio_write( lua_State* L )
   pin = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( gpio, pin );
   level = luaL_checkinteger( L, 2 );
-  if ( level!=HIGH && level!=LOW ) {
-      luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
+  if ( level!=HIGH && level!=LOW )
+    return luaL_error( L, "wrong arg type" );
   platform_gpio_write(pin, level);
   return 0;  
 }
@@ -188,12 +173,12 @@ static int lgpio_serout( lua_State* L )
   MOD_CHECK_ID( gpio, pin );
   level = luaL_checkinteger( L, 2 );
   if ( level!=HIGH && level!=LOW )
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
   if( lua_istable( L, 3 ) )
   {
     table_len = lua_objlen( L, 3 );
     if (table_len <= 0 || table_len>DELAY_TABLE_MAX_LEN)
-      { luaL_error( L, "wrong arg range" ); return 0; }
+      return luaL_error( L, "wrong arg range" );
     int i;
     for( i = 0; i < table_len; i ++ )
     {
@@ -201,17 +186,16 @@ static int lgpio_serout( lua_State* L )
       delay_table[i] = ( int )luaL_checkinteger( L, -1 );
       lua_pop( L, 1 );
       if( delay_table[i] < 0 || delay_table[i] > 1000000 )    // can not delay more than 1000000 us
-        { luaL_error( L, "delay must < 1000000 us" ); return 0; };
+        return luaL_error( L, "delay must < 1000000 us" );
     }
   } else {
-    luaL_error( L, "wrong arg range" );
-    return 0;
+    return luaL_error( L, "wrong arg range" );
   } 
 
   if(lua_isnumber(L, 4))
     repeat = lua_tointeger( L, 4 );
   if( repeat < 0 || repeat > DELAY_TABLE_MAX_LEN )
-    { luaL_error( L, "delay must < 256" ); return 0; }
+    return luaL_error( L, "delay must < 256" );
 
   if(repeat==0)
     repeat = 1;
@@ -237,7 +221,6 @@ static int lgpio_serout( lua_State* L )
   return 0;  
 }
 #undef DELAY_TABLE_MAX_LEN
-
 
 // Module function map
 #define MIN_OPT_LEVEL 2

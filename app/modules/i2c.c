@@ -18,16 +18,12 @@ static int i2c_setup( lua_State *L )
   MOD_CHECK_ID( gpio, sda );
   MOD_CHECK_ID( gpio, scl );
 
-  if(scl==0 || sda==0) {
-    luaL_error( L, "no i2c for D0" );
-    return 0;
-  }
+  if(scl==0 || sda==0)
+    return luaL_error( L, "no i2c for D0" );
 
   s32 speed = ( s32 )luaL_checkinteger( L, 4 );
-  if (speed <= 0) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
+  if (speed <= 0)
+    return luaL_error( L, "wrong arg range" );
   lua_pushinteger( L, platform_i2c_setup( id, sda, scl, (u32)speed ) );
   return 1;
 }
@@ -60,11 +56,8 @@ static int i2c_address( lua_State *L )
   int direction = luaL_checkinteger( L, 3 );
 
   MOD_CHECK_ID( i2c, id );
-  if ( address < 0 || address > 127 ) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-
+  if ( address < 0 || address > 127 )
+    return luaL_error( L, "wrong arg range" );
   lua_pushboolean( L, platform_i2c_send_address( id, (u16)address, direction ) );
   return 1;
 }
@@ -81,11 +74,8 @@ static int i2c_write( lua_State *L )
   unsigned argn;
 
   MOD_CHECK_ID( i2c, id );
-  if( lua_gettop( L ) < 2 ) {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
-
+  if( lua_gettop( L ) < 2 )
+    return luaL_error( L, "wrong arg type" );
   for( argn = 2; argn <= lua_gettop( L ); argn ++ )
   {
     // lua_isnumber() would silently convert a string of digits to an integer
@@ -93,10 +83,8 @@ static int i2c_write( lua_State *L )
     if( lua_type( L, argn ) == LUA_TNUMBER )
     {
       numdata = ( int )luaL_checkinteger( L, argn );
-      if( numdata < 0 || numdata > 255 ) {
-    	  luaL_error( L, "wrong arg range" );
-          return 0;
-      }
+      if( numdata < 0 || numdata > 255 )
+        return luaL_error( L, "wrong arg range" );
       if( platform_i2c_send_byte( id, numdata ) != 1 )
         break;
       wrote ++;
@@ -109,11 +97,8 @@ static int i2c_write( lua_State *L )
         lua_rawgeti( L, argn, i + 1 );
         numdata = ( int )luaL_checkinteger( L, -1 );
         lua_pop( L, 1 );
-        if( numdata < 0 || numdata > 255 ) {
-        	luaL_error( L, "wrong arg range" );
-        	return 0;
-        }
-
+        if( numdata < 0 || numdata > 255 )
+          return luaL_error( L, "wrong arg range" );
         if( platform_i2c_send_byte( id, numdata ) == 0 )
           break;
       }

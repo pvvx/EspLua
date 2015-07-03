@@ -30,7 +30,9 @@
  *
  * @author Johny Mattsson <jmattsson@dius.com.au>
  */
-#if 0 // не используется
+#if 1
+
+#include "user_config.h"
 #include "user_exceptions.h"
 
 #define LOAD_MASK   0x00f00fu
@@ -38,8 +40,9 @@
 #define L16UI_MATCH 0x001002u
 #define L16SI_MATCH 0x009002u
 
+void call_user_start(void) ICACHE_RAM_ATTR ;
 
-void load_non_32_wide_handler (struct exception_frame *ef, uint32_t cause)
+void ICACHE_RAM_ATTR load_non_32_wide_handler (struct exception_frame *ef, uint32_t cause)
 {
   /* If this is not EXCCAUSE_LOAD_STORE_ERROR you're doing it wrong! */
   (void)cause;
@@ -96,20 +99,11 @@ die:
   ef->epc += 3;            /* resume at following instruction */
 }
 
-
-/**
- * The SDK's user_main function installs a debugging handler regardless
- * of whether there's a proper handler installed for EXCCAUSE_LOAD_STORE_ERROR,
- * which of course breaks everything if we allow that to go through. As such,
- * we use the linker to wrap that call and stop the SDK from shooting itself in
- * its proverbial foot.
-exception_handler_fn
-__wrap__xtos_set_exception_handler (uint32_t cause, exception_handler_fn fn)
+void ICACHE_RAM_ATTR call_user_start(void)
 {
-  if (cause != EXCCAUSE_LOAD_STORE_ERROR)
-    _xtos_set_exception_handler (cause, fn);
+  _xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, load_non_32_wide_handler);
+  call_user_strt1();
 }
- */
 
 #endif
 

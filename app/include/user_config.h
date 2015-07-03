@@ -43,9 +43,11 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".text")))
 #endif
 
+#define ICACHE_STR_LUA_ATTR __attribute__((aligned(4))) __attribute__((section("irom.text")))
+
 #define CLIENT_SSL_ENABLE
 #define GPIO_INTERRUPT_ENABLE
-
+#define SHA2_ENABLE
 // #define BUILD_WOFS		1
 #define BUILD_SPIFFS	1
 

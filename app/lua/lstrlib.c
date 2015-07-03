@@ -182,22 +182,20 @@ typedef struct MatchState {
 #define L_ESC		'%'
 #define SPECIALS	"^$*+?.([%-"
 
-static const char check_capture_err[] ICACHE_RODATA_ATTR = "invalid capture index";
 
 static int check_capture (MatchState *ms, int l) {
   l -= '1';
   if (l < 0 || l >= ms->level || ms->capture[l].len == CAP_UNFINISHED)
-    return luaL_error_(ms->L, check_capture_err);
+    return luaL_error(ms->L, "invalid capture index");
   return l;
 }
 
-static const char capture_to_close_err[] ICACHE_RODATA_ATTR = "invalid pattern capture";
 
 static int capture_to_close (MatchState *ms) {
   int level = ms->level;
   for (level--; level>=0; level--)
     if (ms->capture[level].len == CAP_UNFINISHED) return level;
-  return luaL_error_(ms->L, capture_to_close_err);
+  return luaL_error(ms->L, "invalid pattern capture");
 }
 
 
@@ -584,9 +582,8 @@ static int gmatch (lua_State *L) {
 
 #if LUA_OPTIMIZE_MEMORY == 0 || !defined(LUA_COMPAT_GFIND)
 static int gfind_nodef (lua_State *L) {
-  luaL_error(L, LUA_QL("string.gfind") " was renamed to "
+  return luaL_error(L, LUA_QL("string.gfind") " was renamed to "
                        LUA_QL("string.gmatch"));
-  return  0
 }
 #endif
 
@@ -758,7 +755,6 @@ static void addintlen (char *form) {
   form[l + sizeof(LUA_INTFRMLEN) - 1] = '\0';
 }
 
-static const char str_format_err[] ICACHE_RODATA_ATTR = "invalid option " LUA_QL("%%%c") " to " LUA_QL("format");
 
 static int str_format (lua_State *L) {
   int top = lua_gettop(L);
@@ -821,8 +817,8 @@ static int str_format (lua_State *L) {
           }
         }
         default: {  /* also treat cases `pnLlh' */
-          luaL_error_(L, str_format_err , *(strfrmt - 1));
-          return 0;
+          return luaL_error(L, "invalid option " LUA_QL("%%%c") " to "
+                               LUA_QL("format"), *(strfrmt - 1));
         }
       }
       luaL_addlstring(&b, buff, c_strlen(buff));

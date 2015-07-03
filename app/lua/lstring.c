@@ -5,7 +5,6 @@
 */
 
 
-#include "user_config.h"
 #include "c_string.h"
 
 #define lstring_c
@@ -17,9 +16,6 @@
 #include "lobject.h"
 #include "lstate.h"
 #include "lstring.h"
-
-#include "rom2ram.h"
-
 
 #define LUAS_READONLY_STRING      1
 #define LUAS_REGULAR_STRING       0
@@ -70,11 +66,7 @@ static TString *newlstr (lua_State *L, const char *str, size_t l,
   ts->tsv.marked = luaC_white(G(L));
   ts->tsv.tt = LUA_TSTRING;
   if (!readonly) {
-#ifndef USE_ROM_STRINGS
-	c_memcpy(ts+1, str, l*sizeof(char));
-#else
-	copy_s4d1((void *)(ts+1), (void *)str, l*sizeof(char));
-#endif
+    c_memcpy(ts+1, str, l*sizeof(char));
     ((char *)(ts+1))[l] = '\0';  /* ending 0 */
   } else {
     *(char **)(ts+1) = (char *)str;
@@ -94,11 +86,7 @@ static TString *luaS_newlstr_helper (lua_State *L, const char *str, size_t l, in
   size_t step = (l>>5)+1;  /* if string is too long, don't hash all its chars */
   size_t l1;
   for (l1=l; l1>=step; l1-=step)  /* compute hash */
-#ifndef	USE_ROM_STRINGS
-    h = h ^ ((h<<5)+(h>>2) + cast(unsigned char, str[l1-1]));
-#else
-    h = h ^ ((h<<5)+(h>>2) + (unsigned char)get_rom_chr(&str[l1-1]));
-#endif
+    h = h ^ ((h<<5)+(h>>2)+cast(unsigned char, str[l1-1]));
   for (o = G(L)->strt.hash[lmod(h, G(L)->strt.size)];
        o != NULL;
        o = o->gch.next) {
@@ -120,18 +108,13 @@ static int lua_is_ptr_in_ro_area(const char *p) {
 #include "compiler.h"
 
   return p >= RODATA_START_ADDRESS && p <= RODATA_END_ADDRESS;
-//  return p >= ((char *)0x40000000);
 #endif
 }
 
 TString *luaS_newlstr (lua_State *L, const char *str, size_t l) {
   // If the pointer is in a read-only memory and the string is at least 4 chars in length,
   // create it as a read-only string instead
-#ifndef	USE_ROM_STRINGS
   if(lua_is_ptr_in_ro_area(str) && l+1 > sizeof(char**) && l == c_strlen(str))
-#else
-  if(lua_is_ptr_in_ro_area(str) && l+1 > sizeof(char**) && l == rom_strlen(str))
-#endif
     return luaS_newlstr_helper(L, str, l, LUAS_READONLY_STRING);
   else
     return luaS_newlstr_helper(L, str, l, LUAS_REGULAR_STRING);
@@ -139,11 +122,7 @@ TString *luaS_newlstr (lua_State *L, const char *str, size_t l) {
 
 
 LUAI_FUNC TString *luaS_newrolstr (lua_State *L, const char *str, size_t l) {
-#ifndef	USE_ROM_STRINGS
   if(l+1 > sizeof(char**) && l == c_strlen(str))
-#else
-  if(l+1 > sizeof(char**) && l == rom_strlen(str))
-#endif
     return luaS_newlstr_helper(L, str, l, LUAS_READONLY_STRING);
   else // no point in creating a RO string, as it would actually be larger
     return luaS_newlstr_helper(L, str, l, LUAS_REGULAR_STRING);

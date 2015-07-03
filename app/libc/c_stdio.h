@@ -60,22 +60,21 @@ extern void output_redirect(const char *str);
 #define c_sprintf os_sprintf
 #else
 #include "c_stdarg.h"
-void c_sprintf(char* s,char *fmt, ...);
+void c_sprintf(char* s, char *fmt, ...);
 #endif
 
+extern char print_mem_buf[256];
+
 // #define c_vsprintf ets_vsprintf
-#define c_printf(fmt, ...) do {	\
-	static const char flash_str[] __attribute__((aligned(4))) \
-	__attribute__((section(".irom.text"))) = fmt; \
-	unsigned char __print_buf[256];		\
-	c_sprintf(__print_buf, (char *)flash_str, ##__VA_ARGS__);	\
-	c_puts(__print_buf);					\
+
+#define c_printf(...) do {	\
+	c_sprintf(print_mem_buf, __VA_ARGS__);	\
+	c_puts(print_mem_buf);					\
 } while(0)
 
 #define c_printf_(...) do {	\
-	unsigned char __print_buf[256];		\
-	c_sprintf(__print_buf, __VA_ARGS__);	\
-	c_puts(__print_buf);					\
+	c_sprintf(print_mem_buf, __VA_ARGS__);	\
+	c_puts(print_mem_buf);					\
 } while(0)
 
 // #define c_getc ets_getc

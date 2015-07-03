@@ -13,21 +13,23 @@
 #define NULL 0
 #endif
 
-#define c_memcmp os_memcmp
-#define c_memcpy os_memcpy
-#define c_memset os_memset
-
-#define c_strcat os_strcat
-#define c_strchr os_strchr
-#define c_strcmp os_strcmp
-#define c_strcpy os_strcpy
-#define c_strlen os_strlen
-#define c_strncmp os_strncmp
-#define c_strncpy os_strncpy
-// #define c_strstr os_strstr
+#define c_memcmp ets_memcmp
+#define c_memcpy ets_memcpy
+#define c_memmove ets_memmove
+#define c_memset ets_memset
+#define c_putc ets_putc
+#define c_str2macaddr ets_str2macaddr
+#define c_strcat strcat
+#define c_strchr strchr
+#define c_strcmp ets_strcmp
+#define c_strcpy ets_strcpy
+#define c_strlen ets_strlen
+#define c_strncmp ets_strncmp
+#define c_strncpy ets_strncpy
+//#define c_strstr ets_strstr
 #define c_strncasecmp c_strncmp
 
-#define c_strstr strstr
+#define c_strstr  strstr
 #define c_strncat strncat
 #define c_strcspn strcspn
 #define c_strpbrk strpbrk

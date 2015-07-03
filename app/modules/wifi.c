@@ -126,7 +126,7 @@ static int wifi_start_smart( lua_State* L )
   }
 
   if ( channel > 14 || channel < 1 )
-    { luaL_error( L, "wrong arg range" ); return 0; }
+    return luaL_error( L, "wrong arg range" );
 
   if(wifi_smart_succeed == LUA_NOREF){
     smart_begin(channel, NULL, NULL);
@@ -156,7 +156,7 @@ static int wifi_setmode( lua_State* L )
   mode = luaL_checkinteger( L, 1 );
 
   if ( mode != STATION_MODE && mode != SOFTAP_MODE && mode != STATIONAP_MODE )
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
   wifi_set_opmode( (uint8_t)mode);
   mode = (unsigned)wifi_get_opmode();
   lua_pushinteger( L, mode );
@@ -217,7 +217,7 @@ static int wifi_setphymode( lua_State* L )
   mode = luaL_checkinteger( L, 1 );
 
   if ( mode != PHY_MODE_11B && mode != PHY_MODE_11G && mode != PHY_MODE_11N )
-    { luaL_error( L, "wrong arg type" ); return 0; };
+    return luaL_error( L, "wrong arg type" );
   wifi_set_phy_mode( (uint8_t)mode);
   mode = (unsigned)wifi_get_phy_mode();
   lua_pushinteger( L, mode );
@@ -262,7 +262,7 @@ static int wifi_setmac( lua_State* L, uint8_t mode )
   unsigned len = 0;
   const char *macaddr = luaL_checklstring( L, 1, &len );
   if(len!=17)
-	  { luaL_error( L, "wrong arg type" ); return 0; }
+	  return luaL_error( L, "wrong arg type" );
 
   os_str2macaddr(mac, macaddr);
   lua_pushboolean(L,wifi_set_macaddr(mode, (uint8 *)mac));
@@ -332,7 +332,7 @@ static int wifi_setip( lua_State* L, uint8_t mode )
   wifi_get_ip_info(mode, &pTempIp);
 
   if (!lua_istable(L, 1))
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
   uint32_t ip = parse_key(L, "ip");
   if(ip!=0) 
     pTempIp.ip.addr = ip;
@@ -368,7 +368,7 @@ static int wifi_sleeptype( lua_State* L )
   if ( lua_isnumber(L, 1) ){
     type = lua_tointeger(L, 1);
     if ( type != NONE_SLEEP_T && type != LIGHT_SLEEP_T && type != MODEM_SLEEP_T )
-      { luaL_error( L, "wrong arg type" ); return 0; }
+      return luaL_error( L, "wrong arg type" );
     if(!wifi_set_sleep_type(type)){
       lua_pushnil(L);
       return 1;
@@ -484,16 +484,16 @@ static int wifi_station_config( lua_State* L )
   int auto_connect=0;
   const char *ssid = luaL_checklstring( L, 1, &sl );
   if (sl>32 || ssid == NULL)
-    { luaL_error( L, "ssid:<32" ); return 0; }
+    return luaL_error( L, "ssid:<32" );
   const char *password = luaL_checklstring( L, 2, &pl );
   if (pl!=0 && (pl<8 || pl>64) || password == NULL)
-    { luaL_error( L, "pwd:0,8~64" ); return  0; }
+    return luaL_error( L, "pwd:0,8~64" );
 
   if(lua_isnumber(L, 3))
   {
     auto_connect=luaL_checkinteger( L, 3 );;
     if ( auto_connect != 0 && auto_connect != 1)
-    	{ luaL_error( L, "wrong arg type" ); return 0; }
+    	return luaL_error( L, "wrong arg type" );
   }
   else if (lua_isstring(L, 3)&& !(lua_isnumber(L, 3)))
   {
@@ -505,7 +505,7 @@ static int wifi_station_config( lua_State* L )
   else
   {
     if(lua_isnil(L, 3))
-	   	{ luaL_error( L, "wrong arg type" ); return 0; }
+	   	return luaL_error( L, "wrong arg type" );
 	auto_connect=1;
   }
 
@@ -520,7 +520,7 @@ static int wifi_station_config( lua_State* L )
 	{
 	  const char *macaddr = luaL_checklstring( L, 4, &ml );
 	  if (ml!=17)
-	    { luaL_error( L, "MAC:FF:FF:FF:FF:FF:FF" ); return 0; }
+	    return luaL_error( L, "MAC:FF:FF:FF:FF:FF:FF" );
 	  c_memset(sta_conf.bssid, 0, 6);
 	  os_str2macaddr(sta_conf.bssid, macaddr);
 	  sta_conf.bssid_set = 1;
@@ -537,9 +537,9 @@ static int wifi_station_config( lua_State* L )
   c_memcpy(sta_conf.ssid, ssid, sl);
   c_memcpy(sta_conf.password, password, pl);
 
-  NODE_DBG_(sta_conf.ssid);
+  NODE_DBG(sta_conf.ssid);
   NODE_DBG(" %d\n", sl);
-  NODE_DBG_(sta_conf.password);
+  NODE_DBG(sta_conf.password);
   NODE_DBG(" %d\n", pl);
   NODE_DBG(" %d\n", sta_conf.bssid_set);
   NODE_DBG( MACSTR, MAC2STR(sta_conf.bssid));
@@ -585,7 +585,7 @@ static int wifi_station_setauto( lua_State* L )
   a = luaL_checkinteger( L, 1 );
 
   if ( a != 0 && a != 1 )
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
   wifi_station_set_auto_connect(a);
   if(a){
     // station_check_connect(0);
@@ -633,8 +633,7 @@ static int wifi_station_listap( lua_State* L )
 {
   if(wifi_get_opmode() == SOFTAP_MODE)
   {
-    luaL_error( L, "Can't list ap in SOFTAP mode" );
-    return 0;
+    return luaL_error( L, "Can't list ap in SOFTAP mode" );
   }
   gL = L;
   struct scan_config scan_cfg;
@@ -654,15 +653,15 @@ static int wifi_station_listap( lua_State* L )
 	    {
 	      const char *ssidstr = luaL_checklstring( L, -1, &len );
 	      if(len>32)
-	        { luaL_error( L, "ssid:<32" ); return 0; }
+	        return luaL_error( L, "ssid:<32" );
 	      c_memset(ssid, 0, 32);
 	      c_memcpy(ssid, ssidstr, len);
 	      scan_cfg.ssid=ssid;
-	      NODE_DBG_(scan_cfg.ssid);
+	      NODE_DBG(scan_cfg.ssid);
 	      NODE_DBG("\n");
 	    }
 	    else
-	      { luaL_error( L, "wrong arg type" ); return 0; }
+	      return luaL_error( L, "wrong arg type" );
 	  }
 	  else
 		  scan_cfg.ssid=NULL;
@@ -673,7 +672,7 @@ static int wifi_station_listap( lua_State* L )
 	    {
 	      const char *macaddr = luaL_checklstring( L, -1, &len );
 	      if(len!=17)
-	        { luaL_error( L, "bssid: FF:FF:FF:FF:FF:FF" ); return 0; }
+	        return luaL_error( L, "bssid: FF:FF:FF:FF:FF:FF" );
 	      c_memset(bssid, 0, 6);
 	      os_str2macaddr(bssid, macaddr);
 	      scan_cfg.bssid=bssid;
@@ -682,7 +681,7 @@ static int wifi_station_listap( lua_State* L )
 
 	    }
 	    else
-	      { luaL_error( L, "wrong arg type" ); return 0; }
+	      return luaL_error( L, "wrong arg type" );
 	  }
 	  else
 		  scan_cfg.bssid=NULL;
@@ -694,12 +693,12 @@ static int wifi_station_listap( lua_State* L )
 	    {
 	      channel = luaL_checknumber( L, -1);
 	      if(!(channel>=0 && channel<=13))
-	        { luaL_error( L, "channel: 0 or 1-13" ); return 0; }
+	        return luaL_error( L, "channel: 0 or 1-13" );
 	      scan_cfg.channel=channel;
 	      NODE_DBG("%d\n", scan_cfg.channel);
 	    }
 	    else
-	      { luaL_error( L, "wrong arg type" ); return 0; }
+	      return luaL_error( L, "wrong arg type" );
 	  }
 	  else
 		  scan_cfg.channel=0;
@@ -710,13 +709,13 @@ static int wifi_station_listap( lua_State* L )
 	    {
 	      show_hidden = luaL_checknumber( L, -1);
 	      if(show_hidden!=0 && show_hidden!=1)
-	        { luaL_error( L, "show_hidden: 0 or 1" ); return 0; }
+	        return luaL_error( L, "show_hidden: 0 or 1" );
 	      scan_cfg.show_hidden=show_hidden;
 	      NODE_DBG("%d\n", scan_cfg.show_hidden);
 
 	    }
 	    else
-	      { luaL_error( L, "wrong arg type" ); return 0; }
+	      return luaL_error( L, "wrong arg type" );
 	  }
 	  else
 		  scan_cfg.show_hidden=0;
@@ -749,8 +748,7 @@ static int wifi_station_listap( lua_State* L )
   }
   else
   {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
+	  return luaL_error( L, "wrong arg type" );
   }
 
 
@@ -758,7 +756,7 @@ static int wifi_station_listap( lua_State* L )
     {
 	  getap_output_format=luaL_checkinteger( L, 2 );
 	  if ( getap_output_format != 0 && getap_output_format != 1)
-		  { luaL_error( L, "wrong arg type" ); return 0; }
+		  return luaL_error( L, "wrong arg type" );
     }
   NODE_DBG("Use alternate output format: %d\n", getap_output_format);
   if (lua_type(L, 3) == LUA_TFUNCTION || lua_type(L, 3) == LUA_TLIGHTFUNCTION)
@@ -834,7 +832,7 @@ static int wifi_ap_getconfig( lua_State* L )
 static int wifi_ap_config( lua_State* L )
 {
   if (!lua_istable(L, 1))
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
 
   struct softap_config config;
   wifi_softap_get_config(&config);
@@ -847,19 +845,19 @@ static int wifi_ap_config( lua_State* L )
     {
       const char *ssid = luaL_checklstring( L, -1, &len );
       if(len<1 || len>32 || ssid == NULL)
-        { luaL_error( L, "ssid:1~32" ); return 0; }
+        return luaL_error( L, "ssid:1~32" );
       c_memset(config.ssid, 0, 32);
       c_memcpy(config.ssid, ssid, len);
-      NODE_DBG_(config.ssid);
+      NODE_DBG(config.ssid);
       NODE_DBG("\n");
       config.ssid_len = len;
       config.ssid_hidden = 0;
     } 
     else
-      { luaL_error( L, "wrong arg type" ); return 0; }
+      return luaL_error( L, "wrong arg type" );
   }
   else
-  	{ luaL_error( L, "ssid required" ); return 0; }
+    return luaL_error( L, "ssid required" );
 
   lua_getfield(L, 1, "pwd");
   if (!lua_isnil(L, -1)){  /* found? */
@@ -867,15 +865,15 @@ static int wifi_ap_config( lua_State* L )
     {
       const char *pwd = luaL_checklstring( L, -1, &len );
       if(len<8 || len>64 || pwd == NULL)
-        { luaL_error( L, "pwd:8~64" ); return 0; }
+        return luaL_error( L, "pwd:8~64" );
       c_memset(config.password, 0, 64);
       c_memcpy(config.password, pwd, len);
-      NODE_DBG_(config.password);
+      NODE_DBG(config.password);
       NODE_DBG("\n");
       config.authmode = AUTH_WPA_WPA2_PSK;
     }
     else
-      { luaL_error( L, "wrong arg type" ); return 0; }
+      return luaL_error( L, "wrong arg type" );
   }
   else{
     config.authmode = AUTH_OPEN;
@@ -897,7 +895,7 @@ static int wifi_ap_config( lua_State* L )
   {
     unsigned channel = luaL_checkinteger(L, -1);
     if (channel < 1 || channel > 13)
-      { luaL_error( L, "channel:1~13" ); return 0; }
+      return luaL_error( L, "channel:1~13" );
 
     config.channel = (uint8_t)channel;
     NODE_DBG("%d\n", config.channel);
@@ -924,7 +922,7 @@ static int wifi_ap_config( lua_State* L )
   {
     unsigned max = luaL_checkinteger(L, -1);
     if (max < 1 || max > 4)
-      { luaL_error( L, "max:1~4" ); return 0; }
+      return luaL_error( L, "max:1~4" );
 
     config.max_connection = (uint8_t)max;
     NODE_DBG("%d\n", config.max_connection);
@@ -939,7 +937,7 @@ static int wifi_ap_config( lua_State* L )
   {
     unsigned beacon = luaL_checkinteger(L, -1);
     if (beacon < 100 || beacon > 60000)
-      { luaL_error( L, "beacon:100~60000" ); return 0; }
+      return luaL_error( L, "beacon:100~60000" );
 
     config.beacon_interval = (uint16_t)beacon;
     NODE_DBG("%d\n", config.beacon_interval);
@@ -959,8 +957,7 @@ static int wifi_ap_listclient( lua_State* L )
 {
   if (wifi_get_opmode() == STATION_MODE)
   {
-    luaL_error( L, "Can't list client in STATION_MODE mode" );
-    return 0;
+    return luaL_error( L, "Can't list client in STATION_MODE mode" );
   }
 
   char temp[64];
@@ -989,14 +986,14 @@ static int wifi_ap_listclient( lua_State* L )
 static int wifi_ap_dhcp_config( lua_State* L )
 {
   if (!lua_istable(L, 1))
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
 
   struct dhcps_lease lease;
   uint32_t ip;
 
   ip = parse_key(L, "start");
   if (ip == 0)
-    { luaL_error( L, "wrong arg type" ); return 0; }
+    return luaL_error( L, "wrong arg type" );
 
   lease.start_ip.addr = ip;
   NODE_DBG(IPSTR, IP2STR(&lease.start_ip));
@@ -1036,6 +1033,7 @@ static int wifi_ap_dhcp_stop( lua_State* L )
   return 1;
 }
 
+
 static int wifi_phy_set_max_tpw( lua_State* L )
 {
   s32 tpw;
@@ -1054,7 +1052,6 @@ static int wifi_st_get_rssi( lua_State* L )
   lua_pushinteger(L, wifi_station_get_rssi());
   return 1;
 }
-
 
 
 // Module function map
@@ -1076,7 +1073,6 @@ static const LUA_REG_TYPE wifi_station_map[] =
   { LSTRKEY( "getap" ), LFUNCVAL ( wifi_station_listap ) },
   { LSTRKEY( "status" ), LFUNCVAL ( wifi_station_status ) },
   { LSTRKEY( "rssi" ), LFUNCVAL( wifi_st_get_rssi ) },
-
   { LNILKEY, LNILVAL }
 };
 
@@ -1097,6 +1093,7 @@ static const LUA_REG_TYPE wifi_ap_map[] =
   { LSTRKEY( "getmac" ), LFUNCVAL ( wifi_ap_getmac ) },
   { LSTRKEY( "setmac" ), LFUNCVAL ( wifi_ap_setmac ) },
   { LSTRKEY( "getclient" ), LFUNCVAL ( wifi_ap_listclient ) },
+  { LSTRKEY( "maxtpower" ), LFUNCVAL( wifi_phy_set_max_tpw) },
 #if LUA_OPTIMIZE_MEMORY > 0
   { LSTRKEY( "dhcp" ), LROVAL( wifi_ap_dhcp_map ) },
 
@@ -1115,7 +1112,6 @@ const LUA_REG_TYPE wifi_map[] =
   { LSTRKEY( "startsmart" ), LFUNCVAL( wifi_start_smart ) },
   { LSTRKEY( "stopsmart" ), LFUNCVAL( wifi_exit_smart ) },
   { LSTRKEY( "sleeptype" ), LFUNCVAL( wifi_sleeptype ) },
-  { LSTRKEY( "max_tpw" ), LFUNCVAL( wifi_phy_set_max_tpw) },
 #if LUA_OPTIMIZE_MEMORY > 0
   { LSTRKEY( "sta" ), LROVAL( wifi_station_map ) },
   { LSTRKEY( "ap" ), LROVAL( wifi_ap_map ) },

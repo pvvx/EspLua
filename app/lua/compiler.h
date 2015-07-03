@@ -29,7 +29,8 @@ extern char _irom0_text_end;
 // modify linker script to ensure rodata and rodata1 is between _rodata_start and _rodata_end.
 // #define RODATA_START_ADDRESS        (&_rodata_start)
 // #define RODATA_END_ADDRESS          (&_rodata_end)
-#define RODATA_START_ADDRESS        (&_irom0_text_start)
+//#define RODATA_START_ADDRESS        (&_irom0_text_start)
+#define RODATA_START_ADDRESS        ((char*)0x40000000)
 #define RODATA_END_ADDRESS          (&_irom0_text_end)
 
 #else                       // other compilers

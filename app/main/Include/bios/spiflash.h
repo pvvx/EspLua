@@ -17,21 +17,21 @@ struct SPIFlashHsz {
 }__attribute__((packed));
 
 struct SPIFlashHead { // заголовок flash (использует загрузчик BIOS)
-	uint8 id; // = 0xE9
-	uint8 number_segs; // Number of segments
-	uint8 spi_interface; // SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
-	struct SPIFlashHsz hsz; // options
+	uint8 id; 				// +0 = 0xE9
+	uint8 number_segs; 		// +1 Number of segments
+	uint8 spi_interface; 	// +2 SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
+	struct SPIFlashHsz hsz; // +3 options
 }  __attribute__((packed));
 
 struct SPIFlashHeadSegment {
-	uint32 memory_offset; // Memory offset
-	uint32 segment_size; // Segment size
+	uint32 memory_offset; //+08 Memory offset
+	uint32 segment_size; //+0C Segment size
 };
 
 struct SPIFlashHeader { // полный заголовок flash (использует загрузчик BIOS)
-	struct SPIFlashHead head;
-	uint32 entry_point; // Entry point
-	struct SPIFlashHeadSegment seg; // Segment
+	struct SPIFlashHead head;	//+00
+	uint32 entry_point; 		//+04 Entry point
+	struct SPIFlashHeadSegment seg; //+08 Segment
 }  __attribute__((packed));
 
 typedef struct{

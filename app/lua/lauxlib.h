@@ -71,13 +71,7 @@ LUALIB_API int   (luaL_rometatable) (lua_State *L, const char* tname, void *p);
 LUALIB_API void *(luaL_checkudata) (lua_State *L, int ud, const char *tname);
 
 LUALIB_API void (luaL_where) (lua_State *L, int lvl);
-
-LUALIB_API int (luaL_error_) (lua_State *L, const char *fmt, ...);
-
-#define luaL_error(a, fmt, ...) do {	\
-	static const char flash_str[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = fmt;	\
-	luaL_error_(a, flash_str, ##__VA_ARGS__);	\
-	} while(0)
+LUALIB_API int (luaL_error) (lua_State *L, const char *fmt, ...);
 
 LUALIB_API int (luaL_checkoption) (lua_State *L, int narg, const char *def,
                                    const char *const lst[]);

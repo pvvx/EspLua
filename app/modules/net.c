@@ -13,6 +13,10 @@
 #include "c_types.h"
 #include "mem.h"
 #include "espconn.h"
+#include "lwip/dns.h" 
+
+#define ip4_addr_set_u32(dest_ipaddr, src_u32) ((dest_ipaddr)->addr = (src_u32))
+#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == IPADDR_ANY)
 
 #ifdef CLIENT_SSL_ENABLE
 unsigned char *default_certificate;
@@ -87,7 +91,7 @@ static void net_server_disconnected(void *arg)    // for tcp server only
     if( (LUA_NOREF!=socket[i]) && (socket[i] == nud->self_ref) ){
       // found the saved client
       nud->pesp_conn->reverse = NULL;
-//      nud->pesp_conn = NULL;    // the espconn is made by low level sdk, do not need to free, delete() will not free it.
+      nud->pesp_conn = NULL;    // the espconn is made by low level sdk, do not need to free, delete() will not free it.
       nud->self_ref = LUA_NOREF;   // unref this, and the net.socket userdata will delete it self
       luaL_unref(gL, LUA_REGISTRYINDEX, socket[i]);
       socket[i] = LUA_NOREF;
@@ -113,13 +117,13 @@ static void net_socket_disconnected(void *arg)    // tcp only
     lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->self_ref);  // pass the userdata(client) to callback func in lua
     lua_call(gL, 1, 0);
   }
-/*
+
   if(pesp_conn->proto.tcp)
     c_free(pesp_conn->proto.tcp);
   pesp_conn->proto.tcp = NULL;
   if(nud->pesp_conn)
     c_free(nud->pesp_conn);
-  nud->pesp_conn = NULL;  // espconn is already disconnected */
+  nud->pesp_conn = NULL;  // espconn is already disconnected
   lua_gc(gL, LUA_GCSTOP, 0);
   if(nud->self_ref != LUA_NOREF){
     luaL_unref(gL, LUA_REGISTRYINDEX, nud->self_ref);
@@ -204,13 +208,12 @@ static void net_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
     NODE_DBG("self_ref null.\n");
     return;
   }
-
+/* original
   if(ipaddr == NULL)
   {
     NODE_ERR( "DNS Fail!\n" );
     goto end;
   }
-
   // ipaddr->addr is a uint32_t ip
   char ip_str[20];
   c_memset(ip_str, 0, sizeof(ip_str));
@@ -220,8 +223,31 @@ static void net_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
   }
 
   lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->cb_dns_found_ref);    // the callback function
-  lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->self_ref);  // pass the userdata(conn) to callback func in lua
+  //lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->self_ref);  // pass the userdata(conn) to callback func in lua
   lua_pushstring(gL, ip_str);   // the ip para
+*/
+
+  // "enhanced"
+
+  lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->cb_dns_found_ref);    // the callback function
+  lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->self_ref);  // pass the userdata(conn) to callback func in lua
+
+  if(ipaddr == NULL)
+  {
+    NODE_DBG( "DNS Fail!\n" );
+    lua_pushnil(gL);
+  }else{
+    // ipaddr->addr is a uint32_t ip
+    char ip_str[20];
+    c_memset(ip_str, 0, sizeof(ip_str));
+    if(host_ip.addr == 0 && ipaddr->addr != 0)
+    {
+      c_sprintf(ip_str, IPSTR, IP2STR(&(ipaddr->addr)));
+    }
+    lua_pushstring(gL, ip_str);   // the ip para
+  }
+  // "enhanced" end
+
   lua_call(gL, 2, 0);
 
 end:
@@ -364,11 +390,8 @@ static int net_create( lua_State* L, const char* mt )
   }
 
   type = luaL_checkinteger( L, stack );
-  if ( type != ESPCONN_TCP && type != ESPCONN_UDP ) {
-	  luaL_error( L, "wrong arg type" );
-	  return  0;
-  }
-    
+  if ( type != ESPCONN_TCP && type != ESPCONN_UDP )
+    return luaL_error( L, "wrong arg type" );
   stack++;
 #ifdef CLIENT_SSL_ENABLE
   if(!isserver){
@@ -377,8 +400,7 @@ static int net_create( lua_State* L, const char* mt )
       secure = lua_tointeger(L, stack);
       stack++;
       if ( secure != 0 && secure != 1 ){
-        luaL_error( L, "wrong arg type" );
-        return 0;
+        return luaL_error( L, "wrong arg type" );
       }
     } else {
       secure = 0; // default to 0
@@ -392,8 +414,7 @@ static int net_create( lua_State* L, const char* mt )
       unsigned to = lua_tointeger(L, stack);
       stack++;
       if ( to < 1 || to > 28800 ){
-        luaL_error( L, "wrong arg type" );
-        return 0;
+        return luaL_error( L, "wrong arg type" );
       }
       tcp_server_timeover = (uint16_t)to;
     } else {
@@ -424,24 +445,21 @@ static int net_create( lua_State* L, const char* mt )
   if(isserver && type==ESPCONN_TCP && pTcpServer){
     if(tcpserver_cb_connect_ref != LUA_NOREF){      // self_ref should be unref in close()
       lua_pop(L,1);
-      luaL_error(L, "only one tcp server allowed");
-      return 0;
+      return luaL_error(L, "only one tcp server allowed");
     }
     pesp_conn = nud->pesp_conn = pTcpServer;
   } else if(isserver && type==ESPCONN_UDP && pUdpServer){
     temp = (lnet_userdata *)pUdpServer->reverse;
     if(temp && temp->self_ref != LUA_NOREF){
       lua_pop(L,1);
-      luaL_error(L, "only one udp server allowed");
-      return 0;
+      return luaL_error(L, "only one udp server allowed");
     }
     pesp_conn = nud->pesp_conn = pUdpServer;
   } else {
     pesp_conn = nud->pesp_conn = (struct espconn *)c_zalloc(sizeof(struct espconn));
-    if(!pesp_conn) {
-	    luaL_error(L, "not enough memory");
-    	return 0;
-    }
+    if(!pesp_conn)
+      return luaL_error(L, "not enough memory");
+
     pesp_conn->proto.tcp = NULL;
     pesp_conn->proto.udp = NULL;
     pesp_conn->reverse = NULL;
@@ -451,8 +469,7 @@ static int net_create( lua_State* L, const char* mt )
       if(!pesp_conn->proto.tcp){
         c_free(pesp_conn);
         pesp_conn = nud->pesp_conn = NULL;
-        luaL_error(L, "not enough memory");
-        return 0;
+        return luaL_error(L, "not enough memory");
       }
       NODE_DBG("TCP server/socket is set.\n");
     }
@@ -462,8 +479,7 @@ static int net_create( lua_State* L, const char* mt )
       if(!pesp_conn->proto.udp){
         c_free(pesp_conn);
         pesp_conn = nud->pesp_conn = NULL;
-        luaL_error(L, "not enough memory");
-        return 0;
+        return luaL_error(L, "not enough memory");
       }
       NODE_DBG("UDP server/socket is set.\n");
     }
@@ -969,10 +985,8 @@ static int net_on( lua_State* L, const char* mt )
   }
 
   const char *method = luaL_checklstring( L, 2, &sl );
-  if (method == NULL) {
-	  luaL_error( L, "wrong arg type" );
-	  return 0;
-  }
+  if (method == NULL)
+    return luaL_error( L, "wrong arg type" );
 
   luaL_checkanyfunction(L, 3);
   lua_pushvalue(L, 3);  // copy argument (func) to the top of stack
@@ -1003,8 +1017,7 @@ static int net_on( lua_State* L, const char* mt )
     nud->cb_dns_found_ref = luaL_ref(L, LUA_REGISTRYINDEX);
   }else{
   	lua_pop(L, 1);
-  	luaL_error( L, "method not supported" );
-    return 0;
+    return luaL_error( L, "method not supported" );
   }
 
   return 0;  
@@ -1043,8 +1056,7 @@ static int net_send( lua_State* L, const char* mt )
   }
 
   if(isserver && nud->pesp_conn->type == ESPCONN_TCP){
-    luaL_error( L, "tcp server send not supported" );
-    return 0;
+    return luaL_error( L, "tcp server send not supported" );
   }
 
 #if 0
@@ -1058,11 +1070,8 @@ static int net_send( lua_State* L, const char* mt )
 #endif
 
   const char *payload = luaL_checklstring( L, 2, &l );
-  if (l>1460 || payload == NULL) {
-	  luaL_error( L, "need <1460 payload" );
-	  return 0;
-  }
-    
+  if (l>1460 || payload == NULL)
+    return luaL_error( L, "need <1460 payload" );
 
   if (lua_type(L, 3) == LUA_TFUNCTION || lua_type(L, 3) == LUA_TLIGHTFUNCTION){
     lua_pushvalue(L, 3);  // copy argument (func) to the top of stack
@@ -1120,11 +1129,8 @@ static int net_dns( lua_State* L, const char* mt )
   }
 
   const char *domain = luaL_checklstring( L, 2, &l );
-  if (l>128 || domain == NULL) {
-	  luaL_error( L, "need <128 domain" );
-	  return 0;
-  }
-    
+  if (l>128 || domain == NULL)
+    return luaL_error( L, "need <128 domain" );
 
   if (lua_type(L, 3) == LUA_TFUNCTION || lua_type(L, 3) == LUA_TLIGHTFUNCTION){
     lua_pushvalue(L, 3);  // copy argument (func) to the top of stack
@@ -1137,6 +1143,71 @@ static int net_dns( lua_State* L, const char* mt )
   espconn_gethostbyname(pesp_conn, domain, &host_ip, net_dns_found);
 
   return 0;  
+}
+
+// Lua: net.dns.resolve( domain, function(ip) )
+static int net_dns_static( lua_State* L )
+{
+  const char *mt = "net.socket";
+  if (!lua_isstring( L, 1 ))
+    return luaL_error( L, "wrong parameter type (domain)" );
+  
+  int rfunc = LUA_NOREF; //save reference to func
+  if (lua_type(L, 2) == LUA_TFUNCTION || lua_type(L, 2) == LUA_TLIGHTFUNCTION){
+    rfunc = luaL_ref(L, LUA_REGISTRYINDEX);
+  }
+  int rdom = luaL_ref(L, LUA_REGISTRYINDEX); //save reference to domain
+
+  lua_settop(L,0); //empty stack
+  lua_getfield(L, LUA_GLOBALSINDEX, "net");
+  lua_getfield(L, -1, "createConnection");
+  lua_remove(L, -2); //remove "net" from stack
+  lua_pushinteger(L, UDP); // we are going to create a new dummy UDP socket
+  lua_call(L,1,1);// after this the stack should have a socket
+
+  lua_rawgeti(gL, LUA_REGISTRYINDEX, rdom);    // load domain back to the stack
+  lua_rawgeti(gL, LUA_REGISTRYINDEX, rfunc);    // load the callback function back to the stack
+
+  luaL_unref(L, LUA_REGISTRYINDEX, rdom); //free reference
+  luaL_unref(L, LUA_REGISTRYINDEX, rfunc); //free reference
+
+  bool isserver = false;
+  struct espconn *pesp_conn = NULL;
+  lnet_userdata *nud;
+  size_t l;
+  
+  nud = (lnet_userdata *)luaL_checkudata(L, 1, mt);
+  luaL_argcheck(L, nud, 1, "Server/Socket expected");
+  if(nud==NULL){
+    NODE_DBG("userdata is nil.\n");
+    return 0;
+  }
+  if(nud->pesp_conn == NULL){
+    NODE_DBG("nud->pesp_conn is NULL.\n");
+    return 0;
+  }
+  pesp_conn = nud->pesp_conn;
+
+  lua_pushvalue(L, 1);  // copy to the top of stack
+  if(nud->self_ref != LUA_NOREF)
+    luaL_unref(L, LUA_REGISTRYINDEX, nud->self_ref);
+  nud->self_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+  const char *domain = luaL_checklstring( L, 2, &l );
+  if (l>128 || domain == NULL)
+    return luaL_error( L, "need <128 domain" );
+
+  if (lua_type(L, 3) == LUA_TFUNCTION || lua_type(L, 3) == LUA_TLIGHTFUNCTION){
+    lua_pushvalue(L, 3);  // copy argument (func) to the top of stack
+    if(nud->cb_dns_found_ref != LUA_NOREF)
+      luaL_unref(L, LUA_REGISTRYINDEX, nud->cb_dns_found_ref);
+    nud->cb_dns_found_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+  }
+
+  host_ip.addr = 0;
+  espconn_gethostbyname(pesp_conn, domain, &host_ip, net_dns_found);
+
+  return 0;
 }
 
 // Lua: s = net.createServer(type, function(server))
@@ -1312,10 +1383,7 @@ static int net_multicastJoinLeave( lua_State *L, int join)
 	  const char *if_ip;
 
 	  NODE_DBG("net_multicastJoin is called.\n");
-	  if(! lua_isstring(L,1) ) {
-	  	luaL_error( L, "wrong arg type" );
-	  	return 0;
-	  }
+	  if(! lua_isstring(L,1) ) return luaL_error( L, "wrong arg type" );
 	  if_ip = luaL_checklstring( L, 1, &il );
 	  if (if_ip != NULL)
 		 if ( if_ip[0] == '\0' || stricmp(if_ip,"any") == 0)
@@ -1323,21 +1391,12 @@ static int net_multicastJoinLeave( lua_State *L, int join)
 			 if_ip = "0.0.0.0";
 			 il = 7;
 	     }
-	  if (if_ip == NULL || il > 15 || il < 7) {
-		luaL_error( L, "invalid if ip" );
-		return 0;
-	  }
+	  if (if_ip == NULL || il > 15 || il < 7) return luaL_error( L, "invalid if ip" );
 	  if_addr.addr = ipaddr_addr(if_ip);
 
-	  if(! lua_isstring(L,2) ) {
-	  		luaL_error( L, "wrong arg type" );
-	  		return 0;
-	  }
+	  if(! lua_isstring(L,2) ) return luaL_error( L, "wrong arg type" );
 	  multicast_ip = luaL_checklstring( L, 2, &il );
-	  if (multicast_ip == NULL || il > 15 || il < 7) {
-	  	luaL_error( L, "invalid multicast ip" );
-	  	return 0;
-	  }
+	  if (multicast_ip == NULL || il > 15 || il < 7) return luaL_error( L, "invalid multicast ip" );
 	  multicast_addr.addr = ipaddr_addr(multicast_ip);
 	  if (join)
 	  {
@@ -1363,6 +1422,50 @@ static int net_multicastLeave( lua_State* L )
 	return net_multicastJoinLeave(L,0);
 }
 
+
+// Lua: s = net.dns.setdnsserver(ip_addr, [index])
+static int net_setdnsserver( lua_State* L )
+{
+  size_t l;
+  u32_t ip32;
+
+  const char *server = luaL_checklstring( L, 1, &l );
+  if (l>16 || server == NULL || (ip32 = ipaddr_addr(server)) == IPADDR_NONE || ip32 == IPADDR_ANY)
+    return luaL_error( L, "invalid dns server ip" );
+
+  int numdns = luaL_optint(L, 2, 0);
+  if (numdns >= DNS_MAX_SERVERS)
+    return luaL_error( L, "server index out of range [0-%d]", DNS_MAX_SERVERS - 1);
+
+  ip_addr_t ipaddr;
+  ip4_addr_set_u32(&ipaddr, ip32);
+  dns_setserver(numdns,&ipaddr);
+
+  return 0;
+}
+
+// Lua: s = net.dns.getdnsserver([index])
+static int net_getdnsserver( lua_State* L )
+{
+  int numdns = luaL_optint(L, 1, 0);
+  if (numdns >= DNS_MAX_SERVERS)
+    return luaL_error( L, "server index out of range [0-%d]", DNS_MAX_SERVERS - 1);
+
+  // ip_addr_t ipaddr;
+  // dns_getserver(numdns,&ipaddr);
+  // Bug fix by @md5crypt https://github.com/nodemcu/nodemcu-firmware/pull/500
+  ip_addr_t ipaddr = dns_getserver(numdns);
+
+  if ( ip_addr_isany(&ipaddr) ) {
+    lua_pushnil( L );
+  } else {
+    char temp[20] = {0};
+    c_sprintf(temp, IPSTR, IP2STR( &ipaddr.addr ) );
+    lua_pushstring( L, temp );
+  }
+
+  return 1;
+}
 
 #if 0
 static int net_array_index( lua_State* L )
@@ -1434,6 +1537,15 @@ static const LUA_REG_TYPE net_array_map[] =
   { LNILKEY, LNILVAL }
 };
 #endif
+
+static const LUA_REG_TYPE net_dns_map[] =
+{
+  { LSTRKEY( "setdnsserver" ), LFUNCVAL ( net_setdnsserver ) },  
+  { LSTRKEY( "getdnsserver" ), LFUNCVAL ( net_getdnsserver ) }, 
+  { LSTRKEY( "resolve" ), LFUNCVAL ( net_dns_static ) },  
+  { LNILKEY, LNILVAL }
+};
+
 const LUA_REG_TYPE net_map[] = 
 {
   { LSTRKEY( "createServer" ), LFUNCVAL ( net_createServer ) },
@@ -1441,6 +1553,7 @@ const LUA_REG_TYPE net_map[] =
   { LSTRKEY( "multicastJoin"), LFUNCVAL( net_multicastJoin ) },
   { LSTRKEY( "multicastLeave"), LFUNCVAL( net_multicastLeave ) },
 #if LUA_OPTIMIZE_MEMORY > 0
+  { LSTRKEY( "dns" ), LROVAL( net_dns_map ) },
   { LSTRKEY( "TCP" ), LNUMVAL( TCP ) },
   { LSTRKEY( "UDP" ), LNUMVAL( UDP ) },
 
@@ -1503,6 +1616,12 @@ LUALIB_API int luaopen_net( lua_State *L )
   // Setup the methods inside metatable
   luaL_register( L, NULL, net_array_map );
 #endif
+
+  lua_settop(L, n);
+  lua_newtable( L );
+  luaL_register( L, NULL, net_dns_map );
+  lua_setfield( L, -2, "dns" );
+
   return 1;
 #endif // #if LUA_OPTIMIZE_MEMORY > 0  
 }

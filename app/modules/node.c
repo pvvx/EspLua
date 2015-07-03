@@ -16,10 +16,8 @@
 #include "lrotable.h"
 
 #include "c_types.h"
-//#include "romfs.h"
 #include "c_string.h"
 #include "driver/uart.h"
-//#include "spi_flash.h"
 #include "user_interface.h"
 #include "flash_api.h"
 #include "flash_fs.h"
@@ -45,7 +43,7 @@ static int node_deepsleep( lua_State* L )
   {
     option = lua_tointeger(L, 2);
     if ( option < 0 || option > 4)
-      { luaL_error( L, "wrong arg range" ); return 0; }
+      return luaL_error( L, "wrong arg range" );
     else
       deep_sleep_set_option( option );
   }
@@ -55,7 +53,7 @@ static int node_deepsleep( lua_State* L )
     us = lua_tointeger(L, 1);
     // if ( us <= 0 )
     if ( us < 0 )
-      { luaL_error( L, "wrong arg range" ); return  0; }
+      return luaL_error( L, "wrong arg range" );
     else
       system_deep_sleep( us );
   }
@@ -95,6 +93,14 @@ static int node_chipid( lua_State* L )
   return 1;
 }
 
+// deprecated, moved to adc module
+// Lua: readvdd33()
+// static int node_readvdd33( lua_State* L )
+// {
+//   uint32_t vdd33 = readvdd33();
+//   lua_pushinteger(L, vdd33);
+//   return 1;
+// }
 
 // Lua: flashid()
 static int node_flashid( lua_State* L )
@@ -132,8 +138,7 @@ static int node_led( lua_State* L )
   {
     low = lua_tointeger(L, 1);
     if ( low < 0 ) {
-      luaL_error( L, "wrong arg type" );
-      return 0;
+      return luaL_error( L, "wrong arg type" );
     }
   } else {
     low = LED_LOW_COUNT_DEFAULT; // default to LED_LOW_COUNT_DEFAULT
@@ -142,8 +147,7 @@ static int node_led( lua_State* L )
   {
     high = lua_tointeger(L, 2);
     if ( high < 0 ) {
-      luaL_error( L, "wrong arg type" );
-      return 0;
+      return luaL_error( L, "wrong arg type" );
     }
   } else {
     high = LED_HIGH_COUNT_DEFAULT; // default to LED_HIGH_COUNT_DEFAULT
@@ -203,7 +207,7 @@ static int node_key( lua_State* L )
 
   const char *str = luaL_checklstring( L, 1, &sl );
   if (str == NULL)
-    { luaL_error( L, "wrong arg type" ); return 0; };
+    return luaL_error( L, "wrong arg type" );
 
   if (sl == 5 && c_strcmp(str, "short") == 0) {
     ref = &short_key_ref;
@@ -246,7 +250,7 @@ static int node_input( lua_State* L )
       load->line_position = c_strlen(load->line) + 1;
       load->done = 1;
       NODE_DBG("Get command:\n");
-      NODE_DBG_(load->line); // buggy here
+      NODE_DBG(load->line); // buggy here
       NODE_DBG("\nResult(if any):\n");
       os_timer_disarm(&lua_timer);
       os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
@@ -331,21 +335,20 @@ static int node_compile( lua_State* L )
   size_t len;
   const char *fname = luaL_checklstring( L, 1, &len );
   if ( len > FS_NAME_MAX_LENGTH )
-   { luaL_error(L, "filename too long"); return 0; };
+    return luaL_error(L, "filename too long");
 
   char output[FS_NAME_MAX_LENGTH];
   c_strcpy(output, fname);
   // check here that filename end with ".lua".
   if (len < 4 || (c_strcmp( output + len - 4, ".lua") != 0) )
-    { luaL_error(L, "not a .lua file"); return 0; };
+    return luaL_error(L, "not a .lua file");
 
   output[c_strlen(output) - 2] = 'c';
   output[c_strlen(output) - 1] = '\0';
-  NODE_DBG_(output);
+  NODE_DBG(output);
   NODE_DBG("\n");
   if (luaL_loadfsfile(L, fname) != 0) {
-    luaL_error_(L, lua_tostring(L, -1));
-    return 0;
+    return luaL_error(L, lua_tostring(L, -1));
   }
 
   f = toproto(L, -1);
@@ -355,8 +358,7 @@ static int node_compile( lua_State* L )
   file_fd = fs_open(output, fs_mode2flag("w+"));
   if (file_fd < FS_OPEN_OK)
   {
-    luaL_error(L, "cannot open/write to file");
-    return 0;
+    return luaL_error(L, "cannot open/write to file");
   }
 
   lua_lock(L);
@@ -368,12 +370,10 @@ static int node_compile( lua_State* L )
   file_fd = FS_OPEN_OK - 1;
 
   if (result == LUA_ERR_CC_INTOVERFLOW) {
-    luaL_error(L, "value too big or small for target integer type");
-    return 0;
+    return luaL_error(L, "value too big or small for target integer type");
   }
   if (result == LUA_ERR_CC_NOTINTEGER) {
-    luaL_error(L, "target lua_Number is integral but fractional value found");
-    return 0;
+    return luaL_error(L, "target lua_Number is integral but fractional value found");
   }
 
   return 0;

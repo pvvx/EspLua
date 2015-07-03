@@ -12,8 +12,6 @@
 #include "c_stdlib.h"
 #include "c_string.h"
 #include "flash_fs.h"
-#include "rom2ram.h"
-
 
 /* This file uses only the official API of Lua.
 ** Any function declared here could be written as an application function.
@@ -53,24 +51,19 @@
 
 LUALIB_API int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
   lua_Debug ar;
-  if (!lua_getstack(L, 0, &ar)) {  /* no stack frame? */
-	  luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
-    return 0;
-  }
+  if (!lua_getstack(L, 0, &ar))  /* no stack frame? */
+    return luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
   lua_getinfo(L, "n", &ar);
   if (c_strcmp(ar.namewhat, "method") == 0) {
     narg--;  /* do not count `self' */
-    if (narg == 0) { /* error is in the self argument itself? */
-       luaL_error(L, "calling " LUA_QS " on bad self (%s)",
+    if (narg == 0)  /* error is in the self argument itself? */
+      return luaL_error(L, "calling " LUA_QS " on bad self (%s)",
                            ar.name, extramsg);
-       return 0;
-    }
   }
   if (ar.name == NULL)
     ar.name = "?";
-  luaL_error(L, "bad argument #%d to " LUA_QS " (%s)",
-                          narg, ar.name, extramsg);
-  return 0;
+  return luaL_error(L, "bad argument #%d to " LUA_QS " (%s)",
+                        narg, ar.name, extramsg);
 }
 
 
@@ -99,7 +92,7 @@ LUALIB_API void luaL_where (lua_State *L, int level) {
 }
 
 
-LUALIB_API int luaL_error_ (lua_State *L, const char *fmt, ...) {
+LUALIB_API int luaL_error (lua_State *L, const char *fmt, ...) {
   va_list argp;
   va_start(argp, fmt);
   luaL_where(L, 1);
@@ -162,8 +155,8 @@ LUALIB_API void *luaL_checkudata (lua_State *L, int ud, const char *tname) {
   return NULL;  /* to avoid warnings */
 }
 
+
 LUALIB_API void luaL_checkstack (lua_State *L, int space, const char *mes) {
-  test_system_stack();
   if (!lua_checkstack(L, space))
     luaL_error(L, "stack overflow (%s)", mes);
 }
@@ -698,16 +691,15 @@ LUALIB_API int luaL_loadfsfile (lua_State *L, const char *filename) {
   int fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
   lf.extraline = 0;
   if (filename == NULL) {
-	  luaL_error(L, "filename is NULL");
-    return 0;
+    return luaL_error(L, "filename is NULL");
   }
   else {
     lua_pushfstring(L, "@%s", filename);
     lf.f = fs_open(filename, FS_RDONLY);
     if (lf.f < FS_OPEN_OK) return errfsfile(L, "open", fnameindex);
   }
-  // if(fs_size(lf.f)>LUAL_BUFFERSIZE) {
-  //  luaL_error(L, "file is too big");  return 0; }
+  // if(fs_size(lf.f)>LUAL_BUFFERSIZE)
+  //   return luaL_error(L, "file is too big");
   c = fs_getc(lf.f);
   if (c == '#') {  /* Unix exec. file? */
     lf.extraline = 1;

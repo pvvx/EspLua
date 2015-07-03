@@ -17,28 +17,19 @@ static int lpwm_setup( lua_State* L )
   unsigned id;
   
   id = luaL_checkinteger( L, 1 );
-  if(id==0) {
-  	luaL_error( L, "no pwm for D0" );
-  	return 0;
-  }
-    
+  if(id==0)
+    return luaL_error( L, "no pwm for D0" );
   MOD_CHECK_ID( pwm, id );
   freq = luaL_checkinteger( L, 2 );
-  if ( freq <= 0 ) {
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+  if ( freq <= 0 )
+    return luaL_error( L, "wrong arg range" );
   duty = luaL_checkinteger( L, 3 );
-  if ( duty > NORMAL_PWM_DEPTH ) {
+  if ( duty > NORMAL_PWM_DEPTH )
     // Negative values will turn out > 100, so will also fail.
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+    return luaL_error( L, "wrong arg range" );
   freq = platform_pwm_setup( id, (u32)freq, duty );
-  if(freq==0) {
-    luaL_error( L, "too many pwms." );
-    return 0;
-  }
+  if(freq==0)
+    return luaL_error( L, "too many pwms." );
   lua_pushinteger( L, freq );
   return 1;  
 }
@@ -84,10 +75,8 @@ static int lpwm_setclock( lua_State* L )
   id = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( pwm, id );
   clk = luaL_checkinteger( L, 2 );
-  if ( clk <= 0 ) {
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+  if ( clk <= 0 )
+    return luaL_error( L, "wrong arg range" );
   clk = platform_pwm_set_clock( id, (u32)clk );
   lua_pushinteger( L, clk );
   return 1;
@@ -115,10 +104,8 @@ static int lpwm_setduty( lua_State* L )
   id = luaL_checkinteger( L, 1 );
   MOD_CHECK_ID( pwm, id );
   duty = luaL_checkinteger( L, 2 );
-  if ( duty > NORMAL_PWM_DEPTH ) {
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+  if ( duty > NORMAL_PWM_DEPTH )
+    return luaL_error( L, "wrong arg range" );
   duty = platform_pwm_set_duty( id, (u32)duty );
   lua_pushinteger( L, duty );
   return 1;

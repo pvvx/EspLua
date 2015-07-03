@@ -36,7 +36,7 @@ SUBDIRS=    \
 	crypto	\
 	dhtlib	\
 	libc 	\
-	cjson
+	cjson   
 
 #	lwip	\
 #	upgrade	\
@@ -87,7 +87,7 @@ COMPONENTS_eagle.app.v6 = \
 	crypto/libcrypto.a	\
 	dhtlib/libdhtlib.a	\
 	libc/liblibc.a 	\
-	modules/libmodules.a
+	modules/libmodules.a	
 
 #	lwip/liblwip.a	\
 #	json/libjson.a	\
@@ -105,8 +105,8 @@ LINKFLAGS_eagle.app.v6 = \
 	-Wl,--start-group	\
 	-lmc	\
 	-lmgcc	\
+	-l0main	\
 	-lmphy	\
-	-lmmain	\
 	-lmlwip	\
 	-lpp	\
 	-lnet80211	\

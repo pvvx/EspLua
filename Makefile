@@ -21,6 +21,10 @@ ESPTOOL-CK	?= $(SDK_TOOLS)/esptool-ck.exe
 ESPPORT		?= COM2
 ESPBAUD		?= 256000
 
+ADDR_FW1 = 0x00000
+ADDR_FW2 = 0x0C000
+
+
 # SPI_SPEED = 20MHz, 26.7MHz, 40MHz, 80MHz
 SPI_SPEED?=80
 # SPI_MODE: QIO, QOUT, DIO, DOUT
@@ -102,7 +106,8 @@ CPP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
 OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
 #CCFLAGS += -Os 
-CCFLAGS += -ffunction-sections -fno-jump-tables -fdata-sections -foptimize-register-move -mno-target-align 
+CCFLAGS += -ffunction-sections -fno-jump-tables -fdata-sections
+#-ffunction-sections -fno-jump-tables -fdata-sections -foptimize-register-move -mno-target-align 
 
 CSRCS ?= $(wildcard *.c)
 ASRCs ?= $(wildcard *.s)
@@ -178,7 +183,23 @@ endef
 
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
-	$(ESPTOOL) elf2image $< -o $(FIRMWAREDIR)
+	@echo "FW ../bin/$(ADDR_FW1).bin + ../bin/$(ADDR_FW2).bin"
+ifeq ("1","1")
+	$(ESPTOOL) elf2image -o ../bin/ $(flashimageoptions) $<
+	@cat ../bin/rapid_loader.bin ../bin/$(ADDR_FW1).bin >../bin/new.bin
+	@mv -f ../bin/new.bin ../bin/$(ADDR_FW1).bin 
+else	
+	$(OBJCOPY) --only-section .text -O binary $< eagle.app.v6.text.bin
+	$(OBJCOPY) --only-section .data -O binary $< eagle.app.v6.data.bin
+	$(OBJCOPY) --only-section .rodata -O binary $< eagle.app.v6.rodata.bin
+	$(OBJCOPY) --only-section .irom0.text -O binary $< eagle.app.v6.irom0text.bin
+	@C:/Python27/python.exe $(SDK_TOOLS)/gen_appbin.py $< 0 0 15 0
+	$(RM) -f eagle.app.v6.text.bin
+	$(RM) -f eagle.app.v6.data.bin
+	$(RM) -f eagle.app.v6.rodata.bin
+	mv eagle.app.flash.bin ../bin/$(ADDR_FW1).bin
+	mv eagle.app.v6.irom0text.bin ../bin/$(ADDR_FW2).bin
+endif	
 	$(vecho) "------------------------------------------------------------------------------"
 	$(vecho) "Section info:"
 	$(Q) $(OBJDUMP) -h -j .data -j .rodata -j .bss -j .text -j .irom0.text $<
@@ -187,12 +208,15 @@ $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	$(Q) $(SDK_TOOLS)/memanalyzer.exe $(OBJDUMP).exe $<
 	$(vecho) "------------------------------------------------------------------------------"
 
+	
+
 all: .subdirs $(OBJS) $(OLIBS) $(OIMAGES) $(OBINS) $(SPECIAL_MKTARGETS)
 
 clean:
 	$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clean;)
 	$(RM) -r $(ODIR)/$(TARGET)/$(FLAVOR)
 
+	
 clobber: $(SPECIAL_CLOBBER)
 	$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clobber;)
 	$(RM) -r $(ODIR)
@@ -204,7 +228,7 @@ progr: all
 ifndef PDIR
 	$(MAKE) -C ./app flash
 else
-	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD) write_flash $(flashimageoptions) 0x00000 $(FIRMWAREDIR)0x00000.bin 0x0C000 $(FIRMWAREDIR)0x0C000.bin 0x7c000 $(FIRMWAREDIR)esp_init_data_default.bin 0x7e000 $(FIRMWAREDIR)blank.bin
+	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD) write_flash $(flashimageoptions) $(ADDR_FW1) $(FIRMWAREDIR)$(ADDR_FW1).bin $(ADDR_FW2) $(FIRMWAREDIR)$(ADDR_FW2).bin 0x7c000 $(FIRMWAREDIR)esp_init_data_default.bin 0x7e000 $(FIRMWAREDIR)blank.bin
 endif
 
 luainit:

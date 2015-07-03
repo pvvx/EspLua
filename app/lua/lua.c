@@ -217,7 +217,7 @@ static int pushline (lua_State *L, int firstline) {
   if (l > 0 && b[l-1] == '\n')  /* line ends with newline? */
     b[l-1] = '\0';  /* remove it */
   if (firstline && b[0] == '=')  /* first line starts with `=' ? */
-    lua_pushfstring_(L, "return %s", b+1);  /* change it to `return' */
+    lua_pushfstring(L, "return %s", b+1);  /* change it to `return' */
   else
     lua_pushstring(L, b);
   lua_freeline(L, b);
@@ -256,7 +256,7 @@ static void dotty (lua_State *L) {
       lua_getglobal(L, "print");
       lua_insert(L, 1);
       if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)
-        l_message(progname, lua_pushfstring_(L,
+        l_message(progname, lua_pushfstring(L,
                                "error calling " LUA_QL("print") " (%s)",
                                lua_tostring(L, -1)));
     }
@@ -482,7 +482,6 @@ int log_fd = -1;
 int noparse = 0;
 #endif
 
-const char dojob_err[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = "error calling " LUA_QL("print") " (%s)";
 void dojob(lua_Load *load){
   size_t l, rs;
   int status;
@@ -498,7 +497,7 @@ void dojob(lua_Load *load){
       if (l > 0 && b[l-1] == '\n')  /* line ends with newline? */
         b[l-1] = '\0';  /* remove it */
       if (load->firstline && b[0] == '=')  /* first line starts with `=' ? */
-        lua_pushfstring_(L, "return %s", b+1);  /* change it to `return' */
+        lua_pushfstring(L, "return %s", b+1);  /* change it to `return' */
       else
         lua_pushstring(L, b);
       if(load->firstline != 1){
@@ -517,9 +516,10 @@ void dojob(lua_Load *load){
         if (status == 0 && lua_gettop(L) > 0) {  /* any result to print? */
           lua_getglobal(L, "print");
           lua_insert(L, 1);
-          if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0) {
-			  l_message(progname, lua_pushfstring(L, dojob_err , lua_tostring(L, -1)));
-          }
+          if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)
+            l_message(progname, lua_pushfstring(L,
+                                   "error calling " LUA_QL("print") " (%s)",
+                                   lua_tostring(L, -1)));
         }
         load->firstline = 1;
         load->prmt = get_prompt(L, 1);

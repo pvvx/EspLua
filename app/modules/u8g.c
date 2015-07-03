@@ -26,21 +26,6 @@ typedef struct _lu8g_userdata_t lu8g_userdata_t;
 #define LU8G (&(lud->u8g))
 
 
-// function to read 4-byte aligned from program memory AKA irom0
-u8g_pgm_uint8_t ICACHE_FLASH_ATTR u8g_pgm_read(const u8g_pgm_uint8_t *adr)
-{
-    uint32_t iadr = (uint32_t)adr;
-    // set up pointer to 4-byte aligned memory location
-    uint32_t *ptr = (uint32_t *)(iadr & ~0x3);
-
-    // read 4-byte aligned
-    uint32_t pgm_data = *ptr;
-
-    // return the correct byte within the retrieved 32bit word
-    return pgm_data >> ((iadr % 4) * 8);
-}
-
-
 // helper function: retrieve and check userdata argument
 static lu8g_userdata_t *get_lud( lua_State *L )
 {
@@ -760,6 +745,39 @@ static int lu8g_getHeight( lua_State *L )
     return 1;
 }
 
+// Lua: width = u8g.getStrWidth( self, string )
+static int lu8g_getStrWidth( lua_State *L )
+{
+   lu8g_userdata_t *lud;
+
+    if ((lud = get_lud( L )) == NULL)
+        return 0;
+
+    const char *s = luaL_checkstring( L, 2 );
+    if (s == NULL)
+        return 0;
+
+    lua_pushinteger( L, u8g_GetStrWidth( LU8G, s ) );
+
+    return 1;
+}
+
+// Lua: u8g.setFontLineSpacingFactor( self, factor )
+static int lu8g_setFontLineSpacingFactor( lua_State *L )
+{
+   lu8g_userdata_t *lud;
+
+    if ((lud = get_lud( L )) == NULL)
+        return 0;
+
+    u8g_uint_t factor = luaL_checkinteger( L, 2 );
+
+    u8g_SetFontLineSpacingFactor( LU8G, factor );
+
+    return 0;
+}
+
+
 // ------------------------------------------------------------
 // comm functions
 //
@@ -856,22 +874,12 @@ uint8_t u8g_com_esp8266_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void
         break;
     
     case U8G_COM_MSG_WRITE_SEQ:
-        {
-            register uint8_t *ptr = arg_ptr;
-            while( arg_val > 0 )
-            {
-                platform_spi_send_recv( 1, *ptr++ );
-                arg_val--;
-            }
-        }
-        break;
     case U8G_COM_MSG_WRITE_SEQ_P:
         {
             register uint8_t *ptr = arg_ptr;
             while( arg_val > 0 )
             {
-                platform_spi_send_recv( 1, u8g_pgm_read(ptr) );
-                ptr++;
+                platform_spi_send_recv( 1, *ptr++ );
                 arg_val--;
             }
         }
@@ -924,6 +932,7 @@ uint8_t u8g_com_esp8266_ssd_i2c_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, voi
         break;
     
     case U8G_COM_MSG_WRITE_SEQ:
+    case U8G_COM_MSG_WRITE_SEQ_P:
         //u8g->pin_list[U8G_PI_SET_A0] = 1;
         if ( u8g_com_esp8266_ssd_start_sequence(u8g) == 0 )
             return platform_i2c_send_stop( ESP_I2C_ID ), 0;
@@ -940,24 +949,6 @@ uint8_t u8g_com_esp8266_ssd_i2c_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, voi
         // platform_i2c_send_stop( ESP_I2C_ID );
         break;
 
-    case U8G_COM_MSG_WRITE_SEQ_P:
-        //u8g->pin_list[U8G_PI_SET_A0] = 1;
-        if ( u8g_com_esp8266_ssd_start_sequence(u8g) == 0 )
-            return platform_i2c_send_stop( ESP_I2C_ID ), 0;
-        {
-            register uint8_t *ptr = arg_ptr;
-            while( arg_val > 0 )
-            {
-                // ignore return value -> tolerate missing ACK
-                if ( platform_i2c_send_byte( ESP_I2C_ID, u8g_pgm_read(ptr) ) == 0 )
-                    ; //return 0;
-                ptr++;
-                arg_val--;
-            }
-        }
-        // platform_i2c_send_stop( ESP_I2C_ID );
-        break;
-      
     case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
         u8g->pin_list[U8G_PI_A0_STATE] = arg_val;
         u8g->pin_list[U8G_PI_SET_A0] = 1;		/* force a0 to set again */
@@ -997,10 +988,8 @@ static int lu8g_ssd1306_128x64_i2c( lua_State *L )
 {
     unsigned addr = luaL_checkinteger( L, 1 );
 
-    if (addr == 0) {
-        luaL_error( L, "i2c address required" );
-        return 0;
-    }
+    if (addr == 0)
+        return luaL_error( L, "i2c address required" );
 
     lu8g_userdata_t *lud = (lu8g_userdata_t *) lua_newuserdata( L, sizeof( lu8g_userdata_t ) );
 
@@ -1022,11 +1011,8 @@ static int lu8g_ssd1306_128x64_i2c( lua_State *L )
     //                      |  |               |
     lud->pb = (u8g_pb_t){ { 8, 64, 0, 0, 0 }, 128, NULL };
     //
-    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL) {
-        luaL_error( L, "out of memory" );
-	    return 0;
-    }
-        
+    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL)
+        return luaL_error( L, "out of memory" );
 
     // and finally init device using specific interface init function
     u8g_InitI2C( LU8G, &(lud->dev), U8G_I2C_OPT_NONE);
@@ -1046,17 +1032,11 @@ static int lu8g_ssd1306_128x64_i2c( lua_State *L )
 static int lu8g_ssd1306_128x64_spi( lua_State *L )
 {
     unsigned cs = luaL_checkinteger( L, 1 );
-    if (cs == 0) {
-        luaL_error( L, "CS pin required" );
-        return 0;
-    }
-        
+    if (cs == 0)
+        return luaL_error( L, "CS pin required" );
     unsigned dc = luaL_checkinteger( L, 2 );
-    if (dc == 0) {
-    	luaL_error( L, "D/C pin required" );
-    	return 0;
-    }
-        
+    if (dc == 0)
+        return luaL_error( L, "D/C pin required" );
     unsigned res = luaL_optinteger( L, 3, U8G_PIN_NONE );
 
     lu8g_userdata_t *lud = (lu8g_userdata_t *) lua_newuserdata( L, sizeof( lu8g_userdata_t ) );
@@ -1077,11 +1057,8 @@ static int lu8g_ssd1306_128x64_spi( lua_State *L )
     //                      |  |               |
     lud->pb = (u8g_pb_t){ { 8, 64, 0, 0, 0 }, 128, NULL };
     //
-    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL) {
-	   luaL_error( L, "out of memory" );
-	    return 0;
-    }
-        
+    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL)
+        return luaL_error( L, "out of memory" );
 
     // and finally init device using specific interface init function
     u8g_InitHWSPI( LU8G, &(lud->dev), cs, dc, res );
@@ -1102,20 +1079,14 @@ uint8_t u8g_dev_pcd8544_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
 static int lu8g_pcd8544_84x48( lua_State *L )
 {
     unsigned sce = luaL_checkinteger( L, 1 );
-    if (sce == 0) {
-        luaL_error( L, "SCE pin required" );
-        return 0;
-        }
+    if (sce == 0)
+        return luaL_error( L, "SCE pin required" );
     unsigned dc = luaL_checkinteger( L, 2 );
-    if (dc == 0) {
-        luaL_error( L, "D/C pin required" );
-        return 0;
-        }
+    if (dc == 0)
+        return luaL_error( L, "D/C pin required" );
     unsigned res = luaL_checkinteger( L, 3 );
-    if (res == 0) {
-        luaL_error( L, "RES pin required" );
-        return 0;
-        }
+    if (res == 0)
+        return luaL_error( L, "RES pin required" );
 
     lu8g_userdata_t *lud = (lu8g_userdata_t *) lua_newuserdata( L, sizeof( lu8g_userdata_t ) );
 
@@ -1135,11 +1106,8 @@ static int lu8g_pcd8544_84x48( lua_State *L )
     //                      |  |              |
     lud->pb = (u8g_pb_t){ { 8, 48, 0, 0, 0 }, 84, NULL };
     //
-    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL) {
-	    luaL_error( L, "out of memory" );
-	    return 0;
-    }
-        
+    if ((lud->pb.buf = (void *)c_zalloc(lud->pb.width)) == NULL)
+        return luaL_error( L, "out of memory" );
 
     // and finally init device using specific interface init function
     u8g_InitHWSPI( LU8G, &(lud->dev), sce, dc, res );
@@ -1163,53 +1131,55 @@ static int lu8g_pcd8544_84x48( lua_State *L )
 static const LUA_REG_TYPE lu8g_display_map[] =
 {
     { LSTRKEY( "begin" ),  LFUNCVAL( lu8g_begin ) },
-    { LSTRKEY( "setFont" ),  LFUNCVAL( lu8g_setFont ) },
-    { LSTRKEY( "setFontRefHeightAll" ),  LFUNCVAL( lu8g_setFontRefHeightAll ) },
-    { LSTRKEY( "setFontRefHeightExtendedText" ),  LFUNCVAL( lu8g_setFontRefHeightExtendedText ) },
-    { LSTRKEY( "setFontRefHeightText" ),  LFUNCVAL( lu8g_setFontRefHeightText ) },
-    { LSTRKEY( "setDefaultBackgroundColor" ),  LFUNCVAL( lu8g_setDefaultBackgroundColor ) },
-    { LSTRKEY( "setDefaultForegroundColor" ),  LFUNCVAL( lu8g_setDefaultForegroundColor ) },
-    { LSTRKEY( "setFontPosBaseline" ),  LFUNCVAL( lu8g_setFontPosBaseline ) },
-    { LSTRKEY( "setFontPosBottom" ),  LFUNCVAL( lu8g_setFontPosBottom ) },
-    { LSTRKEY( "setFontPosCenter" ),  LFUNCVAL( lu8g_setFontPosCenter ) },
-    { LSTRKEY( "setFontPosTop" ),  LFUNCVAL( lu8g_setFontPosTop ) },
-    { LSTRKEY( "getFontAscent" ),  LFUNCVAL( lu8g_getFontAscent ) },
-    { LSTRKEY( "getFontDescent" ),  LFUNCVAL( lu8g_getFontDescent ) },
-    { LSTRKEY( "getFontLineSpacing" ),  LFUNCVAL( lu8g_getFontLineSpacing ) },
-    { LSTRKEY( "getMode" ),  LFUNCVAL( lu8g_getMode ) },
-    { LSTRKEY( "setColorIndex" ),  LFUNCVAL( lu8g_setColorIndex ) },
-    { LSTRKEY( "getColorIndex" ),  LFUNCVAL( lu8g_getColorIndex ) },
+    { LSTRKEY( "drawBitmap" ),  LFUNCVAL( lu8g_drawBitmap ) },
+    { LSTRKEY( "drawBox" ),  LFUNCVAL( lu8g_drawBox ) },
+    { LSTRKEY( "drawCircle" ),  LFUNCVAL( lu8g_drawCircle ) },
+    { LSTRKEY( "drawDisc" ),  LFUNCVAL( lu8g_drawDisc ) },
+    { LSTRKEY( "drawEllipse" ),  LFUNCVAL( lu8g_drawEllipse ) },
+    { LSTRKEY( "drawFilledEllipse" ),  LFUNCVAL( lu8g_drawFilledEllipse ) },
+    { LSTRKEY( "drawFrame" ),  LFUNCVAL( lu8g_drawFrame ) },
+    { LSTRKEY( "drawHLine" ),  LFUNCVAL( lu8g_drawHLine ) },
+    { LSTRKEY( "drawLine" ),  LFUNCVAL( lu8g_drawLine ) },
+    { LSTRKEY( "drawPixel" ),  LFUNCVAL( lu8g_drawPixel ) },
+    { LSTRKEY( "drawRBox" ),  LFUNCVAL( lu8g_drawRBox ) },
+    { LSTRKEY( "drawRFrame" ),  LFUNCVAL( lu8g_drawRFrame ) },
     { LSTRKEY( "drawStr" ),  LFUNCVAL( lu8g_drawStr ) },
     { LSTRKEY( "drawStr90" ),  LFUNCVAL( lu8g_drawStr90 ) },
     { LSTRKEY( "drawStr180" ),  LFUNCVAL( lu8g_drawStr180 ) },
     { LSTRKEY( "drawStr270" ),  LFUNCVAL( lu8g_drawStr270 ) },
-    { LSTRKEY( "drawBox" ),  LFUNCVAL( lu8g_drawBox ) },
-    { LSTRKEY( "drawLine" ),  LFUNCVAL( lu8g_drawLine ) },
     { LSTRKEY( "drawTriangle" ),  LFUNCVAL( lu8g_drawTriangle ) },
-    { LSTRKEY( "drawRBox" ),  LFUNCVAL( lu8g_drawRBox ) },
-    { LSTRKEY( "drawFrame" ),  LFUNCVAL( lu8g_drawFrame ) },
-    { LSTRKEY( "drawRFrame" ),  LFUNCVAL( lu8g_drawRFrame ) },
-    { LSTRKEY( "drawDisc" ),  LFUNCVAL( lu8g_drawDisc ) },
-    { LSTRKEY( "drawCircle" ),  LFUNCVAL( lu8g_drawCircle ) },
-    { LSTRKEY( "drawEllipse" ),  LFUNCVAL( lu8g_drawEllipse ) },
-    { LSTRKEY( "drawFilledEllipse" ),  LFUNCVAL( lu8g_drawFilledEllipse ) },
-    { LSTRKEY( "drawPixel" ),  LFUNCVAL( lu8g_drawPixel ) },
-    { LSTRKEY( "drawHLine" ),  LFUNCVAL( lu8g_drawHLine ) },
     { LSTRKEY( "drawVLine" ),  LFUNCVAL( lu8g_drawVLine ) },
-    { LSTRKEY( "drawBitmap" ),  LFUNCVAL( lu8g_drawBitmap ) },
     { LSTRKEY( "drawXBM" ),  LFUNCVAL( lu8g_drawXBM ) },
-    { LSTRKEY( "setScale2x2" ),  LFUNCVAL( lu8g_setScale2x2 ) },
-    { LSTRKEY( "undoScale" ),  LFUNCVAL( lu8g_undoScale ) },
     { LSTRKEY( "firstPage" ),  LFUNCVAL( lu8g_firstPage ) },
+    { LSTRKEY( "getColorIndex" ),  LFUNCVAL( lu8g_getColorIndex ) },
+    { LSTRKEY( "getFontAscent" ),  LFUNCVAL( lu8g_getFontAscent ) },
+    { LSTRKEY( "getFontDescent" ),  LFUNCVAL( lu8g_getFontDescent ) },
+    { LSTRKEY( "getFontLineSpacing" ),  LFUNCVAL( lu8g_getFontLineSpacing ) },
+    { LSTRKEY( "getHeight" ),  LFUNCVAL( lu8g_getHeight ) },
+    { LSTRKEY( "getMode" ),  LFUNCVAL( lu8g_getMode ) },
+    { LSTRKEY( "getStrWidth" ), LFUNCVAL( lu8g_getStrWidth ) },
+    { LSTRKEY( "getWidth" ),  LFUNCVAL( lu8g_getWidth ) },
     { LSTRKEY( "nextPage" ),  LFUNCVAL( lu8g_nextPage ) },
-    { LSTRKEY( "sleepOn" ),  LFUNCVAL( lu8g_sleepOn ) },
-    { LSTRKEY( "sleepOff" ),  LFUNCVAL( lu8g_sleepOff ) },
+    { LSTRKEY( "setColorIndex" ),  LFUNCVAL( lu8g_setColorIndex ) },
+    { LSTRKEY( "setDefaultBackgroundColor" ),  LFUNCVAL( lu8g_setDefaultBackgroundColor ) },
+    { LSTRKEY( "setDefaultForegroundColor" ),  LFUNCVAL( lu8g_setDefaultForegroundColor ) },
+    { LSTRKEY( "setFont" ),  LFUNCVAL( lu8g_setFont ) },
+    { LSTRKEY( "setFontLineSpacingFactor" ),  LFUNCVAL( lu8g_setFontLineSpacingFactor ) },
+    { LSTRKEY( "setFontPosBaseline" ),  LFUNCVAL( lu8g_setFontPosBaseline ) },
+    { LSTRKEY( "setFontPosBottom" ),  LFUNCVAL( lu8g_setFontPosBottom ) },
+    { LSTRKEY( "setFontPosCenter" ),  LFUNCVAL( lu8g_setFontPosCenter ) },
+    { LSTRKEY( "setFontPosTop" ),  LFUNCVAL( lu8g_setFontPosTop ) },
+    { LSTRKEY( "setFontRefHeightAll" ),  LFUNCVAL( lu8g_setFontRefHeightAll ) },
+    { LSTRKEY( "setFontRefHeightExtendedText" ),  LFUNCVAL( lu8g_setFontRefHeightExtendedText ) },
+    { LSTRKEY( "setFontRefHeightText" ),  LFUNCVAL( lu8g_setFontRefHeightText ) },
     { LSTRKEY( "setRot90" ),  LFUNCVAL( lu8g_setRot90 ) },
     { LSTRKEY( "setRot180" ),  LFUNCVAL( lu8g_setRot180 ) },
     { LSTRKEY( "setRot270" ),  LFUNCVAL( lu8g_setRot270 ) },
+    { LSTRKEY( "setScale2x2" ),  LFUNCVAL( lu8g_setScale2x2 ) },
+    { LSTRKEY( "sleepOff" ),  LFUNCVAL( lu8g_sleepOff ) },
+    { LSTRKEY( "sleepOn" ),  LFUNCVAL( lu8g_sleepOn ) },
     { LSTRKEY( "undoRotation" ),  LFUNCVAL( lu8g_undoRotation ) },
-    { LSTRKEY( "getWidth" ),  LFUNCVAL( lu8g_getWidth ) },
-    { LSTRKEY( "getHeight" ),  LFUNCVAL( lu8g_getHeight ) },
+    { LSTRKEY( "undoScale" ),  LFUNCVAL( lu8g_undoScale ) },
     { LSTRKEY( "__gc" ),  LFUNCVAL( lu8g_close_display ) },
 #if LUA_OPTIMIZE_MEMORY > 0
     { LSTRKEY( "__index" ), LROVAL ( lu8g_display_map ) },

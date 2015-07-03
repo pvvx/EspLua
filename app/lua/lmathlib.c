@@ -264,9 +264,7 @@ static int math_random (lua_State *L) {
       lua_pushnumber(L, (r%(u-l+1))+l);  /* int between `l' and `u' */
       break;
     }
-    default: 
-	    luaL_error(L, "wrong number of arguments");
-    	return 0;
+    default: return luaL_error(L, "wrong number of arguments");
   }
   return 1;
 }
@@ -295,9 +293,7 @@ static int math_random (lua_State *L) {
       lua_pushnumber(L, floor(r*(u-l+1))+l);  /* int between `l' and `u' */
       break;
     }
-    default:
-    	luaL_error(L, "wrong number of arguments");
-    	return 0;
+    default: return luaL_error(L, "wrong number of arguments");
   }
   return 1;
 }
@@ -340,7 +336,7 @@ const LUA_REG_TYPE math_map[] = {
   {LSTRKEY("floor"), LFUNCVAL(math_floor)},
   // {LSTRKEY("fmod"),  LFUNCVAL(math_fmod)},
 #if LUA_OPTIMIZE_MEMORY > 0 && defined(LUA_COMPAT_MOD)
-  {LSTRKEY("mod"),   LFUNCVAL(math_fmod)}, 
+  // {LSTRKEY("mod"),   LFUNCVAL(math_fmod)}, 
 #endif
   // {LSTRKEY("frexp"), LFUNCVAL(math_frexp)},
   // {LSTRKEY("ldexp"), LFUNCVAL(math_ldexp)},

@@ -29,7 +29,6 @@
 ** model but changing `fputs' to put the strings at a proper place
 ** (a console window or a log file, for instance).
 */
-static const char luaB_print_err[] ICACHE_RODATA_ATTR = LUA_QL("tostring") " must return a string to " LUA_QL("print");
 static int luaB_print (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
   int i;
@@ -41,7 +40,8 @@ static int luaB_print (lua_State *L) {
     lua_call(L, 1, 1);
     s = lua_tostring(L, -1);  /* get result */
     if (s == NULL)
-      return luaL_error_(L, luaB_print_err);
+      return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                           LUA_QL("print"));
 #if defined(LUA_USE_STDIO)
     if (i>1) c_fputs("\t", c_stdout);
     c_fputs(s, c_stdout);
@@ -355,11 +355,10 @@ static int luaB_dofile (lua_State *L) {
 static int luaB_assert (lua_State *L) {
   luaL_checkany(L, 1);
   if (!lua_toboolean(L, 1))
-    return luaL_error_(L, "%s", luaL_optstring(L, 2, "assertion failed!"));
+    return luaL_error(L, "%s", luaL_optstring(L, 2, "assertion failed!"));
   return lua_gettop(L);
 }
 
-static const char luaB_unpack_err[] ICACHE_RODATA_ATTR = "too many results to unpack";
 
 static int luaB_unpack (lua_State *L) {
   int i, e, n;
@@ -369,7 +368,7 @@ static int luaB_unpack (lua_State *L) {
   if (i > e) return 0;  /* empty range */
   n = e - i + 1;  /* number of elements */
   if (n <= 0 || !lua_checkstack(L, n))  /* n <= 0 means arith. overflow */
-    return luaL_error_(L, luaB_unpack_err);
+    return luaL_error(L, "too many results to unpack");
   lua_rawgeti(L, 1, i);  /* push arg[i] (avoiding overflow problems) */
   while (i++ < e)  /* push arg[i + 1...e] */
     lua_rawgeti(L, 1, i);
@@ -433,7 +432,7 @@ static int luaB_tostring (lua_State *L) {
       lua_pushliteral(L, "nil");
       break;
     default:
-      lua_pushfstring_(L, "%s: %p", luaL_typename(L, 1), lua_topointer(L, 1));
+      lua_pushfstring(L, "%s: %p", luaL_typename(L, 1), lua_topointer(L, 1));
       break;
   }
   return 1;
@@ -580,7 +579,7 @@ static int auxresume (lua_State *L, lua_State *co, int narg) {
   if (!lua_checkstack(co, narg))
     luaL_error(L, "too many arguments to resume");
   if (status != CO_SUS) {
-    lua_pushfstring_(L, "cannot resume %s coroutine", statnames[status]);
+    lua_pushfstring(L, "cannot resume %s coroutine", statnames[status]);
     return -1;  /* error flag */
   }
   lua_xmove(L, co, narg);

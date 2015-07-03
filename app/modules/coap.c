@@ -78,10 +78,9 @@ static int coap_create( lua_State* L, const char* mt )
 
   // create the espconn struct
   pesp_conn = (struct espconn *)c_zalloc(sizeof(struct espconn));
-  if(!pesp_conn) {
-    luaL_error(L, "not enough memory");
-    return 0;
-  }    
+  if(!pesp_conn)
+    return luaL_error(L, "not enough memory");
+
   cud->pesp_conn = pesp_conn;
 
   pesp_conn->type = ESPCONN_UDP;
@@ -92,8 +91,7 @@ static int coap_create( lua_State* L, const char* mt )
   if(!pesp_conn->proto.udp){
     c_free(pesp_conn);
     cud->pesp_conn = pesp_conn = NULL;
-    luaL_error(L, "not enough memory");
-    return 0;
+    return luaL_error(L, "not enough memory");
   }
   pesp_conn->state = ESPCONN_NONE;
   NODE_DBG("UDP server/client is set.\n");
@@ -287,12 +285,12 @@ static void coap_response_handler(void *arg, char *pdata, unsigned short len)
     {
       /* There is no block option set, just read the data and we are done. */
       NODE_DBG("%d.%02d\t", (pkt.hdr.code >> 5), pkt.hdr.code & 0x1F);
-      NODE_DBG_((char *)pkt.payload.p);
+      NODE_DBG((char *)pkt.payload.p);
     }
     else if (COAP_RESPONSE_CLASS(pkt.hdr.code) >= 4)
     {
       NODE_DBG("%d.%02d\t", (pkt.hdr.code >> 5), pkt.hdr.code & 0x1F);
-      NODE_DBG_((char *)pkt.payload.p);
+      NODE_DBG((char *)pkt.payload.p);
     }
   }
 
@@ -328,11 +326,8 @@ static int coap_request( lua_State* L, coap_method_t m )
   {
     t = lua_tointeger(L, stack);
     stack++;
-    if ( t != COAP_TYPE_CON && t != COAP_TYPE_NONCON ) {
-      luaL_error( L, "wrong arg type" );
-      return 0;
-    }
-      
+    if ( t != COAP_TYPE_CON && t != COAP_TYPE_NONCON )
+      return luaL_error( L, "wrong arg type" );
   } else {
     t = COAP_TYPE_CON; // default to CON
   }
@@ -340,16 +335,12 @@ static int coap_request( lua_State* L, coap_method_t m )
   size_t l;
   const char *url = luaL_checklstring( L, stack, &l );
   stack++;
-  if (url == NULL) {
-    luaL_error( L, "wrong arg type" );
-    return 0;
-  }
+  if (url == NULL)
+    return luaL_error( L, "wrong arg type" );
 
   coap_uri_t *uri = coap_new_uri(url, l);   // should call free(uri) somewhere
-  if (uri == NULL) {
-     luaL_error( L, "uri wrong format." );
-     return 0;
-  }
+  if (uri == NULL)
+    return luaL_error( L, "uri wrong format." );
 
   pesp_conn->proto.udp->remote_port = uri->port;
   NODE_DBG("UDP port is set: %d.\n", uri->port);
@@ -361,7 +352,7 @@ static int coap_request( lua_State* L, coap_method_t m )
 
     ipaddr.addr = ipaddr_addr(host);
     NODE_DBG("Host len(%d):", uri->host.length);
-    NODE_DBG_(host);
+    NODE_DBG(host);
     NODE_DBG("\n");
 
     c_memcpy(pesp_conn->proto.udp->remote_ip, &ipaddr.addr, 4);
@@ -437,11 +428,8 @@ static int coap_regist( lua_State* L, const char* mt, int isvar )
 {
   size_t l;
   const char *name = luaL_checklstring( L, 2, &l );
-  if (name == NULL) {
-	  luaL_error( L, "name must be set." );
-	  return 0;
-  }
-    
+  if (name == NULL)
+    return luaL_error( L, "name must be set." );
 
   coap_luser_entry *h = NULL;
   // if(lua_isstring(L, 3))
@@ -459,11 +447,8 @@ static int coap_regist( lua_State* L, const char* mt, int isvar )
   if(h->name==NULL || c_strcmp(h->name, name)!=0){   // not exists. make a new one.
     h->next = (coap_luser_entry *)c_zalloc(sizeof(coap_luser_entry));
     h = h->next;
-    if(h == NULL) {
-	    luaL_error(L, "not enough memory");
-	    return 0;
-    }
-      
+    if(h == NULL)
+      return luaL_error(L, "not enough memory");
     h->next = NULL;
     h->name = NULL;
     h->L = NULL;

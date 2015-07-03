@@ -30,8 +30,7 @@ static int adc_readvdd33( lua_State* L )
     // Bug fix
 	  if (wifi_station_get_connect_status()!=0)
 	  {
-        luaL_error( L, "Can't read vdd33 while station is connected" );
-        return 0;
+        return luaL_error( L, "Can't read vdd33 while station is connected" );
 	  }
 	  else
 	  {

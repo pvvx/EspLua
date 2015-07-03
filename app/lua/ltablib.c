@@ -5,7 +5,6 @@
 */
 
 
-#include "user_config.h"
 #include "c_stddef.h"
 
 #define ltablib_c
@@ -88,7 +87,6 @@ static int setn (lua_State *L) {
   return 1;
 }
 
-const char tinsert_err[] ICACHE_RODATA_ATTR = "wrong number of arguments to " LUA_QL("insert");
 
 static int tinsert (lua_State *L) {
   int e = aux_getn(L, 1) + 1;  /* first empty element */
@@ -109,7 +107,7 @@ static int tinsert (lua_State *L) {
       break;
     }
     default: {
-		return luaL_error_(L, tinsert_err);
+      return luaL_error(L, "wrong number of arguments to " LUA_QL("insert"));
     }
   }
   luaL_setn(L, 1, e);  /* new size */

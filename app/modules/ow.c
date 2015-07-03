@@ -12,11 +12,8 @@ static int ow_setup( lua_State *L )
 {
   unsigned id = luaL_checkinteger( L, 1 );
   
-  if(id==0) {
-		luaL_error( L, "no 1-wire for D0" );
-		return  0;
-  }
-    
+  if(id==0)
+    return luaL_error( L, "no 1-wire for D0" );
 
   MOD_CHECK_ID( ow, id );
 
@@ -55,31 +52,23 @@ static int ow_select( lua_State *L )
   if( lua_istable( L, 2 ) )
   {
     datalen = lua_objlen( L, 2 );
-    if (datalen!=8) {
-	    luaL_error( L, "wrong arg range" );
-	    return 0;
-    }
-      
+    if (datalen!=8)
+      return luaL_error( L, "wrong arg range" );
     for( i = 0; i < datalen; i ++ )
     {
       lua_rawgeti( L, 2, i + 1 );
       numdata = ( int )luaL_checkinteger( L, -1 );
       lua_pop( L, 1 );
-      if( numdata > 255 ) {
-        luaL_error( L, "wrong arg range" );
-        return 0;
-      }
-        
+      if( numdata > 255 )
+        return luaL_error( L, "wrong arg range" );
       rom[i] = (uint8_t)numdata;
     }
   }
   else
   {
     pdata = luaL_checklstring( L, 2, &datalen );
-    if (datalen!=8) {
-        luaL_error( L, "wrong arg range" );
-	    return 0;
-    }
+    if (datalen!=8)
+      return luaL_error( L, "wrong arg range" );
     for( i = 0; i < datalen; i ++ ){
       rom[i] = pdata[i];
     }
@@ -97,11 +86,8 @@ static int ow_write( lua_State *L )
   MOD_CHECK_ID( ow, id );
 
   int v = (int)luaL_checkinteger( L, 2 );
-  if( v > 255 ) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if( v > 255 )
+    return luaL_error( L, "wrong arg range" );
   if(lua_isnumber(L, 3))
     power = lua_tointeger(L, 3);
   if(power!=0)
@@ -191,10 +177,9 @@ static int ow_target_search( lua_State *L )
   MOD_CHECK_ID( ow, id );
 
   int code = (int)luaL_checkinteger( L, 2 );
-  if( code > 255 ) {
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+  if( code > 255 )
+    return luaL_error( L, "wrong arg range" );
+
   onewire_target_search((uint8_t)id, (uint8_t)code);
 
   return 0;
@@ -236,11 +221,8 @@ static int ow_crc8( lua_State *L )
 {
   size_t datalen;
   const uint8_t *pdata = luaL_checklstring( L, 1, &datalen );
-  if(datalen > 255) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if(datalen > 255)
+    return luaL_error( L, "wrong arg range" );
   lua_pushinteger( L, onewire_crc8(pdata, (uint8_t)datalen) );
   return 1;
 }
@@ -253,36 +235,25 @@ static int ow_check_crc16( lua_State *L )
   size_t datalen;
   uint8_t inverted_crc[2];
   const uint8_t *pdata = luaL_checklstring( L, 1, &datalen );
-  if(datalen > 65535) {
-    luaL_error( L, "wrong arg range" );
-    return 0;
-  }
+  if(datalen > 65535)
+    return luaL_error( L, "wrong arg range" );
 
   int crc = 0;
   crc = luaL_checkinteger( L, 2 );
-  if(datalen > 255) {
-	 luaL_error( L, "wrong arg range" );
-	 return 0;
-  }
-    
+  if(datalen > 255)
+    return luaL_error( L, "wrong arg range" );
   inverted_crc[0] = (uint8_t)crc;
 
   crc = luaL_checkinteger( L, 3 );
-  if(datalen > 255) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if(datalen > 255)
+    return luaL_error( L, "wrong arg range" );
   inverted_crc[1] = (uint8_t)crc;
 
   crc = 0;
   if(lua_isnumber(L, 4))
     crc = lua_tointeger(L, 4);
-  if(crc > 65535) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if(crc > 65535)
+    return luaL_error( L, "wrong arg range" );
 
   lua_pushboolean( L, onewire_check_crc16(pdata, (uint16_t)datalen, inverted_crc, (uint16_t)crc) );
 
@@ -295,19 +266,13 @@ static int ow_crc16( lua_State *L )
 {
   size_t datalen;
   const uint8_t *pdata = luaL_checklstring( L, 1, &datalen );
-  if(datalen > 65535) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if(datalen > 65535)
+    return luaL_error( L, "wrong arg range" );
   int crc = 0;
   if(lua_isnumber(L, 2))
     crc = lua_tointeger(L, 2);
-  if(crc > 65535) {
-	  luaL_error( L, "wrong arg range" );
-	  return 0;
-  }
-    
+  if(crc > 65535)
+    return luaL_error( L, "wrong arg range" );
 
   lua_pushinteger( L, onewire_crc16(pdata, (uint16_t)datalen, (uint16_t)crc) );
 

@@ -161,18 +161,11 @@ LUA_API void  (lua_pushnil) (lua_State *L);
 LUA_API void  (lua_pushnumber) (lua_State *L, lua_Number n);
 LUA_API void  (lua_pushinteger) (lua_State *L, lua_Integer n);
 LUA_API void  (lua_pushlstring) (lua_State *L, const char *s, size_t l);
-
 LUA_API void  (lua_pushrolstring) (lua_State *L, const char *s, size_t l);
 LUA_API void  (lua_pushstring) (lua_State *L, const char *s);
 LUA_API const char *(lua_pushvfstring) (lua_State *L, const char *fmt,
                                                       va_list argp);
 LUA_API const char *(lua_pushfstring) (lua_State *L, const char *fmt, ...);
-
-#define lua_pushfstring_(a, fmt, ...) do {	\
-	static const char flash_str[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = fmt;	\
-	lua_pushfstring(a, flash_str, ##__VA_ARGS__);	\
-	} while(0)
-
 LUA_API void  (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
 LUA_API void  (lua_pushboolean) (lua_State *L, int b);
 LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);

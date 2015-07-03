@@ -77,7 +77,7 @@ typedef enum {
 #endif
 #ifndef ICACHE_RODATA_ATTR
 #define ICACHE_STORE_ATTR	__attribute__((aligned(4)))
-#define ICACHE_RODATA_ATTR	__attribute__((section(".irom.text")))
+#define ICACHE_RODATA_ATTR	//__attribute__((section(".irom.text")))
 #endif
 
 #define __forceinline __attribute__((always_inline)) inline

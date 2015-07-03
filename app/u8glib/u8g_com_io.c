@@ -57,6 +57,7 @@
 
 typedef volatile uint8_t * IO_PTR;
 
+
 /* create internal pin number */
 uint8_t u8g_Pin(uint8_t port, uint8_t bitpos)
 {

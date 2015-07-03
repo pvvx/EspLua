@@ -453,10 +453,8 @@ static int io_readline (lua_State *L) {
     return 0;
   }
   sucess = read_line(L, *pf);
-  if (fs_error(*pf)) {
-	    luaL_error(L, "err(%d)", fs_error(*pf));
-	    return 0;
-  }
+  if (fs_error(*pf))
+    return luaL_error(L, "err(%d)", fs_error(*pf));
   if (sucess) return 1;
   else {  /* EOF */
     if (lua_toboolean(L, lua_upvalueindex(2))) {  /* generator created file? */

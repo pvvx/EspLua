@@ -88,7 +88,7 @@ extern "C" {
 #    define U8G_FONT_SECTION(name) U8G_SECTION(".progmem." name)
 #  endif
 #  if defined(__XTENSA__)
-#    define U8G_FONT_SECTION(name) U8G_SECTION(".u8g_progmem." name)
+#    define U8G_FONT_SECTION(name)
 #  endif
 #else
 #  define U8G_NOINLINE
@@ -115,19 +115,21 @@ typedef uint8_t u8g_fntpgm_uint8_t;
 #define U8G_PSTR(s) ((u8g_pgm_uint8_t *)PSTR(s))
 
 #elif defined(__XTENSA__)
-#  define U8G_PROGMEM
-#  define PROGMEM U8G_SECTION(".u8g_progmem.data")
+#  define U8G_PROGMEM 
+#  define PROGMEM __attribute__((aligned(4))) __attribute__((section(".ug8.data")))
    typedef uint8_t u8g_pgm_uint8_t;
    typedef uint8_t u8g_fntpgm_uint8_t;
-   u8g_pgm_uint8_t u8g_pgm_read(const u8g_pgm_uint8_t *adr);
+#  define u8g_pgm_read(adr) (unsigned char)get_rom_chr((unsigned char *)adr)
 #  define U8G_PSTR(s) ((u8g_pgm_uint8_t *)(s))
 
 #else
-#  define U8G_PROGMEM
-#  define PROGMEM
+#  define U8G_PROGMEM 
+#  define PROGMEM __attribute__((aligned(4))) __attribute__((section(".ug8.data"))
+#  define U8G_FONT_SECTION(name) __attribute__((aligned(4))) __attribute__((section(name)))
    typedef uint8_t u8g_pgm_uint8_t;
    typedef uint8_t u8g_fntpgm_uint8_t;
-#  define u8g_pgm_read(adr) (*(const u8g_pgm_uint8_t *)(adr)) 
+#  define u8g_pgm_read(adr) (unsigned char)get_rom_chr((unsigned char *)adr)
+//#  define u8g_pgm_read(adr) (*(const u8g_pgm_uint8_t *)(adr)) 
 #  define U8G_PSTR(s) ((u8g_pgm_uint8_t *)(s))
 
 #endif
