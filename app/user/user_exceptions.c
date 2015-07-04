@@ -101,6 +101,7 @@ die:
 
 void ICACHE_RAM_ATTR call_user_start(void)
 {
+  Cache_Read_Disable();
   _xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, load_non_32_wide_handler);
   call_user_strt1();
 }

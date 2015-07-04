@@ -183,11 +183,15 @@ endef
 
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
+	$(vecho) "------------------------------------------------------------------------------"
 	@echo "FW ../bin/$(ADDR_FW1).bin + ../bin/$(ADDR_FW2).bin"
 ifeq ("1","1")
 	$(ESPTOOL) elf2image -o ../bin/ $(flashimageoptions) $<
-	@cat ../bin/rapid_loader.bin ../bin/$(ADDR_FW1).bin >../bin/new.bin
-	@mv -f ../bin/new.bin ../bin/$(ADDR_FW1).bin 
+	$(vecho) "------------------------------------------------------------------------------"
+	$(vecho) "Add rapid_loader:"
+	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin 
+	@dd if=../bin/rapid_loader.bin >../bin/$(ADDR_FW1).bin
+	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
 else	
 	$(OBJCOPY) --only-section .text -O binary $< eagle.app.v6.text.bin
 	$(OBJCOPY) --only-section .data -O binary $< eagle.app.v6.data.bin
@@ -200,9 +204,6 @@ else
 	mv eagle.app.flash.bin ../bin/$(ADDR_FW1).bin
 	mv eagle.app.v6.irom0text.bin ../bin/$(ADDR_FW2).bin
 endif	
-	$(vecho) "------------------------------------------------------------------------------"
-	$(vecho) "Section info:"
-	$(Q) $(OBJDUMP) -h -j .data -j .rodata -j .bss -j .text -j .irom0.text $<
 	$(vecho) "------------------------------------------------------------------------------"
 	$(vecho) "Section info:"
 	$(Q) $(SDK_TOOLS)/memanalyzer.exe $(OBJDUMP).exe $<
