@@ -385,13 +385,13 @@ class ESPFirmwareImage:
         if l > 0:
             if l % 4:
                 data += b"\x00" * (4 - l % 4)
-        self.segments.append((addr, len(data), data))
+            self.segments.append((addr, len(data), data))
 
     def save(self, filename):
         f = file(filename, 'wb')
         f.write(struct.pack('<BBBBI', ESPROM.ESP_IMAGE_MAGIC, len(self.segments),
             self.flash_mode, self.flash_size_freq, self.entrypoint))
-
+            
         checksum = ESPROM.ESP_CHECKSUM_MAGIC
         for (offset, size, data) in self.segments:
             f.write(struct.pack('<II', offset, size))
