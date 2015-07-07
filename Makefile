@@ -189,8 +189,12 @@ ifeq ("1","1")
 	$(ESPTOOL) elf2image -o ../bin/ $(flashimageoptions) $<
 	$(vecho) "------------------------------------------------------------------------------"
 	$(vecho) "Add rapid_loader:"
-	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin 
+	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin
+ifeq ($(freqdiv), 15)	
 	@dd if=../bin/rapid_loader.bin >../bin/$(ADDR_FW1).bin
+else
+	@dd if=../bin/rapid_loader_40m.bin >../bin/$(ADDR_FW1).bin
+endif	
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
 else	
 	$(OBJCOPY) --only-section .text -O binary $< eagle.app.v6.text.bin
@@ -208,7 +212,6 @@ endif
 	$(vecho) "Section info:"
 	$(Q) $(SDK_TOOLS)/memanalyzer.exe $(OBJDUMP).exe $<
 	$(vecho) "------------------------------------------------------------------------------"
-
 	
 
 all: .subdirs $(OBJS) $(OLIBS) $(OIMAGES) $(OBINS) $(SPECIAL_MKTARGETS)
