@@ -71,29 +71,15 @@ void alarm_timer_cb6(void *arg){
 typedef void (*alarm_timer_callback)(void *arg);
 static alarm_timer_callback alarm_timer_cb[NUM_TMR] = {alarm_timer_cb0,alarm_timer_cb1,alarm_timer_cb2,alarm_timer_cb3,alarm_timer_cb4,alarm_timer_cb5,alarm_timer_cb6};
 
+extern void task_delay_us(uint32 us);
 // Lua: delay( us )
 static int tmr_delay( lua_State* L )
 {
-  s32 us;
-  us = luaL_checkinteger( L, 1 );
-  if ( us <= 0 )
-    return luaL_error( L, "wrong arg range" );
-  if(us<1000000)
-  {
-    os_delay_us( us );
-    WRITE_PERI_REG(0x60000914, 0x73);
-    return 0;
-  }  
-  unsigned sec = (unsigned)us / 1000000;
-  unsigned remain = (unsigned)us % 1000000;
-  int i = 0;
-  for(i=0;i<sec;i++){
-    os_delay_us( 1000000 );
-    WRITE_PERI_REG(0x60000914, 0x73);
-  }
-  if(remain>0)
-    os_delay_us( remain );
-  return 0;  
+	  s32 us = luaL_checkinteger( L, 1 );
+	  if (us <= 0 )
+	    return luaL_error( L, "wrong arg range" );
+	  task_delay_us(us);
+	  return 0;
 }
 
 // Lua: now() , return system timer in us

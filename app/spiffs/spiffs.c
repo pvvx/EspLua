@@ -23,14 +23,15 @@ static s32_t my_spiffs_write(u32_t addr, u32_t size, u8_t *src) {
 	return SPIFFS_OK;
 }
 
-extern void pp_soft_wdt_stop(void);
-extern void pp_soft_wdt_stop(void);
+///extern void pp_soft_wdt_stop(void);
+///extern void pp_soft_wdt_stop(void);
+extern void task_delay_us(uint32 us);
 
 static s32_t my_spiffs_erase(u32_t addr, u32_t size) {
 //	if(addr >> 24) addr -= INTERNAL_FLASH_START_ADDRESS;
   u32_t sect_first = addr >> 12;
   u32_t sect_last = (addr + size - 1) >> 12;
-    pp_soft_wdt_stop();
+///    pp_soft_wdt_stop();
     int i = 0;
 	while( sect_first <= sect_last ) {
 		if((sect_first & 15) == 0 && (sect_first + 15) <= sect_last) {
@@ -42,9 +43,10 @@ static s32_t my_spiffs_erase(u32_t addr, u32_t size) {
 			NODE_DBG("fs.erase_sec: 0x%x\n",sect_first);
 			if(flash_safe_erase_sector(sect_first++) != 0) return SPIFFS_ERR_INTERNAL;
 		}
-		if(++i & 15) pp_soft_wdt_stop();
+///		if(++i & 15) pp_soft_wdt_stop();
+		task_delay_us(512);
 	}
-	pp_soft_wdt_restart();
+///	pp_soft_wdt_restart();
 	return SPIFFS_OK;
 } 
 

@@ -360,6 +360,8 @@ PROVIDE ( printf_buf_len = 0x3FFFDD58 );
 PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );
 PROVIDE ( dtm_params = 0x3FFFDD64 );
+PROVIDE ( ets_idle_cb = 0x3FFFDAB0 );
+PROVIDE ( ets_idle_arg = 0x3FFFDAB4 ); 
 
 PROVIDE ( timer_list = 0x3FFFDDB0 );
 

@@ -482,7 +482,9 @@ int log_fd = -1;
 int noparse = 0;
 #endif
 
-void dojob(lua_Load *load){
+extern void ets_set_idle_cb(void *routine, void *arg);
+
+void dojob_cb(lua_Load *load){
   size_t l, rs;
   int status;
   char *b = load->line;
@@ -491,6 +493,7 @@ void dojob(lua_Load *load){
   const char *oldprogname = progname;
   progname = NULL;
   
+  ets_set_idle_cb(NULL, NULL);
   do{
     if(load->done == 1){
       l = c_strlen(b);
@@ -544,6 +547,16 @@ void dojob(lua_Load *load){
   c_puts(load->prmt);
   // NODE_DBG("dojob() is called with firstline.\n");
 }
+
+
+void ICACHE_RAM_ATTR dojob(lua_Load *load)
+{
+	os_timer_disarm(&lua_timer);
+	os_timer_disarm(&readline_timer);
+	ets_set_idle_cb(dojob_cb, load);
+}
+
+
 
 #ifdef DEVKIT_VERSION_0_9
 extern void key_long_press(void *arg);

@@ -1,8 +1,16 @@
-
+------------------------------------------------------------------------------
+-- HTTP server module
+--
+-- LICENCE: http://opensource.org/licenses/MIT
+-- Vladimir Dronnikov <dronnikov@gmail.com>
+------------------------------------------------------------------------------
 local collectgarbage, tonumber, tostring = collectgarbage, tonumber, tostring
 
 local http
 do
+  ------------------------------------------------------------------------------
+  -- request methods
+  ------------------------------------------------------------------------------
   local make_req = function(conn, method, url)
     local req = {
       conn = conn,
@@ -14,6 +22,9 @@ do
     return req
   end
 
+  ------------------------------------------------------------------------------
+  -- response methods
+  ------------------------------------------------------------------------------
   local send = function(self, data, status)
     local c = self.conn
     -- TODO: req.send should take care of response headers!
@@ -76,6 +87,9 @@ do
     return res
   end
 
+    ------------------------------------------------------------------------------
+  -- HTTP parser
+  ------------------------------------------------------------------------------
   local http_handler = function(handler)
     return function(conn)
       local req, res
@@ -174,6 +188,9 @@ do
     end
   end
 
+  ------------------------------------------------------------------------------
+  -- HTTP server
+  ------------------------------------------------------------------------------
   local srv
   local createServer = function(port, handler)
     -- NB: only one server at a time
@@ -184,6 +201,9 @@ do
     return srv
   end
 
+  ------------------------------------------------------------------------------
+  -- HTTP server methods
+  ------------------------------------------------------------------------------
   http = {
     createServer = createServer,
   }

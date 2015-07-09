@@ -251,6 +251,7 @@ SpiFlashOpResult ICACHE_RAM_ATTR flash_safe_write(uint32 des_addr, uint8 *src_ad
 
 extern uint32 stack_low;
 extern void test_system_stack(void);
+extern uint8 print_mem_buf[256];
 
 const char *flash_str2buf(const char * ps)
 {

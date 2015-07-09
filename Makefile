@@ -26,7 +26,7 @@ ADDR_FW2 = 0x0C000
 
 
 # SPI_SPEED = 20MHz, 26.7MHz, 40MHz, 80MHz
-SPI_SPEED?=80
+SPI_SPEED?=40
 # SPI_MODE: QIO, QOUT, DIO, DOUT
 SPI_MODE?=QIO
 # SPI_SIZE: 256KB, 512KB, 1024KB, 2048KB, 4096KB
@@ -106,7 +106,7 @@ CPP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
 OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
 #CCFLAGS += -Os 
-CCFLAGS += -ffunction-sections -fno-jump-tables -fdata-sections
+CCFLAGS += -std=gnu90 -ffunction-sections -fno-jump-tables -fdata-sections
 #-ffunction-sections -fno-jump-tables -fdata-sections -foptimize-register-move -mno-target-align 
 
 CSRCS ?= $(wildcard *.c)

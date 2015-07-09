@@ -13,6 +13,8 @@
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
+#undef __INT_MAX__
+
 #define __INT_MAX__ 2147483647
 #undef __RAND_MAX
 #if __INT_MAX__ == 32767

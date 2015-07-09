@@ -63,18 +63,20 @@ extern void output_redirect(const char *str);
 void c_sprintf(char* s, char *fmt, ...);
 #endif
 
-extern char print_mem_buf[256];
+// extern char print_mem_buf[256];
 
 // #define c_vsprintf ets_vsprintf
 
 #define c_printf(...) do {	\
-	c_sprintf(print_mem_buf, __VA_ARGS__);	\
-	c_puts(print_mem_buf);					\
+	char * buf = (char *)pvPortZalloc(BUFSIZ); \
+    if(buf) {	c_sprintf(buf, __VA_ARGS__);	\
+	c_puts(buf); vPortFree(buf); }			\
 } while(0)
 
 #define c_printf_(...) do {	\
-	c_sprintf(print_mem_buf, __VA_ARGS__);	\
-	c_puts(print_mem_buf);					\
+	char * buf = (char *)pvPortZalloc(BUFSIZ); \
+    if(buf) {	c_sprintf(buf, __VA_ARGS__);	\
+	c_puts(buf); vPortFree(buf); }			\
 } while(0)
 
 // #define c_getc ets_getc
