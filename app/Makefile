@@ -12,10 +12,6 @@
 #     a generated lib/image xxx.a ()
 #
 TARGET = eagle
-#FLAVOR = release
-FLAVOR = debug
-
-#EXTRA_CCFLAGS += -u
 
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
@@ -54,23 +50,8 @@ TARGET_LDFLAGS =		\
 	--longcalls \
 	--text-section-literals
 
-ifeq ($(FLAVOR),debug)
-    TARGET_LDFLAGS += -g -Os
-endif
-
-ifeq ($(FLAVOR),release)
-    TARGET_LDFLAGS += -Os
-endif
-
 LD_FILE = $(LDDIR)/eagle.app.v6.ld
 
-ifeq ($(APP), 1)
-	LD_FILE = $(LDDIR)/eagle.app.v6.app1.ld
-endif
-
-ifeq ($(APP), 2)
-	LD_FILE = $(LDDIR)/eagle.app.v6.app2.ld
-endif
 
 COMPONENTS_eagle.app.v6 = \
     main/libaddmmain.a \

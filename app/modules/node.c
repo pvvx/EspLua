@@ -255,6 +255,7 @@ static int node_input( lua_State* L )
       os_timer_disarm(&lua_timer);
       os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
       os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat
+//    set_run_dojob(load);
     }
   }
   return 0;

@@ -41,11 +41,11 @@ void task_lua(os_event_t *e){
             break;
     }
 }
-
 void task_init(void){
     taskQueue = (os_event_t *)os_malloc(sizeof(os_event_t) * TASK_QUEUE_LEN);
     system_os_task(task_lua, USER_TASK_PRIO_0, taskQueue, TASK_QUEUE_LEN);
 }
+
 
 extern void spiffs_mount();
 
@@ -57,7 +57,6 @@ void user_rf_pre_init(void)
 		ptr_reg_rtc_ram[24] &= 0xFFFF;
 		ptr_reg_rtc_ram[30] = 0;
 	}
-	
 }
 
 void nodemcu_init(void)
@@ -102,7 +101,7 @@ void user_init(void)
     uart_init(BIT_RATE_74880, BIT_RATE_74880);
 #else
     uart_init(BIT_RATE_9600, BIT_RATE_9600);
-    // uart_init(BIT_RATE_115200, BIT_RATE_115200);
+    // uart_init(BIT_RATE_74880, BIT_RATE_74880);
 #endif
 	stack_low = 0x5555AAAA;
     system_timer_reinit();

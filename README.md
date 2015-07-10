@@ -5,10 +5,11 @@
 На текущий момент содержит версии только для тестов.
 
 ###Lua для Wi-Fi модулей esp8266
-Построен на частях от [ESP8266 sdk 1.1.2 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
+Построен на частях от [ESP8266 sdk 1.2.0 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
 Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
 Сjson на основе [lua-cjson](https://github.com/mpx/lua-cjson)<br />
 Файловая система основана на [spiffs](https://github.com/pellepl/spiffs)<br />
+Транслятор [UDK GCC 5.1](http://esp8266.ru/forum/threads/anonsy-unofficial-development-kit-for-espressif-esp8266.32/)
 
 # Резюме
 - Для детей, поиграться на вечер 

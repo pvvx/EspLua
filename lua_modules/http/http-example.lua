@@ -31,7 +31,6 @@ require("http").createServer(80, function(req, res)
       --res:send_header("Connection", "close")
       --res:send("Hello, world!")
       --res:finish()
-      tmr.delay(3000000)
       res:finish("Hello, world!")
     end
   end

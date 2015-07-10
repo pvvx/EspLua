@@ -19,7 +19,7 @@
 #define ICACHE_RODATA_ATTR __attribute__((aligned(4))) __attribute__((section(".irom.text")))
 #endif
 
-#if DEBUGSOO > 0
+#if DEBUGSOO > 1
 const char *txtSPIFlashInterface[] = {"QIO","QOUT","DIO","DOUT"};
 const char *txtFSize[] = {"512K", "256K", "1M", "2M", "4M"};
 const char *txtSFreq[] = {"40MHz","26MHz","20MHz","80MHz"};

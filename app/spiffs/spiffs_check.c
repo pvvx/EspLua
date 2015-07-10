@@ -502,7 +502,6 @@ static s32_t spiffs_page_consistency_check_i(spiffs *fs) {
     // set this flag to abort all checks and rescan the page range
     u8_t restart = 0;
     c_memset(fs->work, 0, SPIFFS_CFG_LOG_PAGE_SZ(fs));
-
     spiffs_block_ix cur_block = 0;
     // build consistency bitmap for id range traversing all blocks
     while (!restart && cur_block < fs->block_count) {

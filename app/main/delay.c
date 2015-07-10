@@ -26,11 +26,15 @@ void ICACHE_RAM_ATTR delay_end(uint32 *px)
 		);
 }
 
+uint32 tt;
+
 void ICACHE_RAM_ATTR delay_wait_cb(void *px)
 {
+//	ets_intr_lock();
+	tt = phy_get_mactime();
 	ets_set_idle_cb(delay_end, px);
+//	ets_intr_unlock();
 }
-
 
 void task_delay_us(uint32 us)
 {
@@ -44,5 +48,18 @@ void task_delay_us(uint32 us)
 	}
 }
 
+extern void * ets_idle_cb;
+void ICACHE_RAM_ATTR run_sdk_tasks(void)
+{
+	uint32 t = phy_get_mactime();
+	if(t-tt > 20480 && ets_idle_cb == NULL) {
+		ETSTimer delay_timer;
+		ets_timer_disarm(&delay_timer);
+		ets_timer_setfn(&delay_timer, (ETSTimerFunc *)(delay_wait_cb), NULL);
+		ets_timer_arm_new(&delay_timer, 1024, 0, 0);
+		ets_run();
+    	tt=t;
+	}
+}
 
 

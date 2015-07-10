@@ -557,7 +557,6 @@ void ICACHE_RAM_ATTR dojob(lua_Load *load)
 }
 
 
-
 #ifdef DEVKIT_VERSION_0_9
 extern void key_long_press(void *arg);
 extern void key_short_press(void *arg);
@@ -607,23 +606,26 @@ extern bool uart0_echo;
 extern bool run_input;
 extern uint16_t need_len;
 extern int16_t end_char;
+
+#if 1
+#include "driver/uart.h"
+extern UartDevice UartDev;
+extern int uart_rx_readbuff(RcvMsgBuff * rcvmsg, uint8 *dst);
+#define uart_getc(a) uart_rx_readbuff(&UartDev.rcv_buff, a)
+#endif
+
 void readline(lua_Load *load){
-  // NODE_DBG("readline() is called.\n");
+	// NODE_DBG("readline() is called.\n");
 #ifdef DEVKIT_VERSION_0_9
   update_key_led();
 #endif
   char ch;
-  while (uart_getc(&ch))
+  while (uart_getc(&ch)==0)
   {
     if(run_input)
     {
       /* handle CR key */
-      if (ch == '\r')
-      {
-        char next;
-        if (uart_getc(&next))
-          ch = next;
-      }
+      if (ch == '\r') uart_getc(&ch);
       /* backspace key */
       else if (ch == 0x7f || ch == 0x08)
       {
@@ -660,11 +662,13 @@ void readline(lua_Load *load){
           os_timer_disarm(&readline_timer);
           os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
           os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
+//          set_run_radline(load);
         } else {
           load->done = 1;
           os_timer_disarm(&lua_timer);
           os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
           os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat
+//          set_run_dojob(load);
         }
         continue;
       }

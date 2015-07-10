@@ -12,8 +12,12 @@
 static os_timer_t alarm_timer[NUM_TMR];
 static int alarm_timer_cb_ref[NUM_TMR] = {LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF};
 static bool alarm_timer_repeat[NUM_TMR]= {0,0,0,0,0,0,0};
+unsigned id_timer;
 
-void alarm_timer_common(lua_State* L, unsigned id){
+///void alarm_timer_common(lua_State* L, unsigned id){
+void alarm_timer_common_cb(lua_State* L){
+  ets_set_idle_cb(NULL,NULL);
+  unsigned id = id_timer;
   if(alarm_timer_cb_ref[id] == LUA_NOREF)
     return;
   lua_rawgeti(L, LUA_REGISTRYINDEX, alarm_timer_cb_ref[id]);
@@ -24,6 +28,12 @@ void alarm_timer_common(lua_State* L, unsigned id){
 
   }
   lua_call(L, 0, 0);
+}
+
+void alarm_timer_common(lua_State* L, unsigned id)
+{
+	ets_set_idle_cb(alarm_timer_common_cb, L);
+	id_timer = id;
 }
 
 void alarm_timer_cb0(void *arg){
@@ -145,7 +155,7 @@ static int tmr_stop( lua_State* L )
 // Lua: wdclr()
 static int tmr_wdclr( lua_State* L )
 {
-  WRITE_PERI_REG(0x60000914, 0x73);
+  task_delay_us(1024);
   // update_key_led();
   return 0;  
 }

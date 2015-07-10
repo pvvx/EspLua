@@ -248,7 +248,7 @@ SpiFlashOpResult ICACHE_RAM_ATTR flash_safe_write(uint32 des_addr, uint8 *src_ad
 	Cache_Read_Enable_def();
 	return ret;
 }
-
+/*
 extern uint32 stack_low;
 extern void test_system_stack(void);
 extern uint8 print_mem_buf[256];
@@ -259,5 +259,7 @@ const char *flash_str2buf(const char * ps)
 	if(&i <= &stack_low) test_system_stack();
 	return (const char *)rom_strcpy(print_mem_buf, (void *) ps, sizeof(print_mem_buf)-1);
 }
+*/
+
 
 

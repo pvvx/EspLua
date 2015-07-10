@@ -20,8 +20,9 @@
 // UartDev is defined and initialized in rom code.
 extern UartDevice UartDev;
 
-LOCAL void ICACHE_RAM_ATTR
-uart0_rx_intr_handler(void *para);
+//LOCAL void ICACHE_RAM_ATTR uart0_rx_intr_handler(void *para);
+
+extern void uart_rx_intr_handler(void *para);
 
 /******************************************************************************
  * FunctionName : uart_config
@@ -38,7 +39,8 @@ uart_config(uint8 uart_no)
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_U1TXD_BK);
     } else {
         /* rcv_buff size if 0x100 */
-        ETS_UART_INTR_ATTACH(uart0_rx_intr_handler,  &(UartDev.rcv_buff));
+        UartDev.buff_uart_no = 0;
+        ETS_UART_INTR_ATTACH(uart_rx_intr_handler,  &(UartDev.rcv_buff));
         PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
         PIN_PULLUP_EN(PERIPHS_IO_MUX_U0RXD_U);
@@ -167,7 +169,7 @@ void ICACHE_FLASH_ATTR uart0_putc(const char c)
     uart_tx_one_char(UART0, c);
   }
 }
-
+#if 0
 /******************************************************************************
  * FunctionName : uart0_rx_intr_handler
  * Description  : Internal used function
@@ -191,7 +193,7 @@ uart0_rx_intr_handler(void *para)
     WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
 
     while (READ_PERI_REG(UART_STATUS(UART0)) & (UART_RXFIFO_CNT << UART_RXFIFO_CNT_S)) {
-        RcvChar = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
+        RcvChar = READ_PERI_REG(UART_FIFO(UART0));// & 0xFF;
 
         /* you can add your handle code below.*/
 
@@ -200,6 +202,7 @@ uart0_rx_intr_handler(void *para)
         // insert here for get one command line from uart
         if (RcvChar == '\r' || RcvChar == '\n' ) {
             pRxBuff->BuffState = WRITE_OVER;
+//            set_run_readline();
         }
         
         if (pRxBuff->pWritePos == (pRxBuff->pRcvMsgBuff + RX_BUFF_SIZE)) {
@@ -218,7 +221,7 @@ uart0_rx_intr_handler(void *para)
         }
     }
 }
-
+#endif
 /******************************************************************************
  * FunctionName : uart_init
  * Description  : user interface for init uart
