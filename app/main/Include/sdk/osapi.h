@@ -45,7 +45,7 @@
 
 #if 0
 #define os_printf(fmt, ...) do {	\
-	static const char flash_str[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = fmt;	\
+	static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
 	os_printf_plus(flash_str, ##__VA_ARGS__);	\
 	} while(0)
 #else

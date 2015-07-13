@@ -113,7 +113,7 @@ static const char *json_token_type_name[] = {
     NULL
 };
 #endif
-static const char json_token_type_name[14][16] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = {
+static const char json_token_type_name[14][16] ICACHE_RODATA_ATTR = {
     {'T','_','O','B','J','_','B','E','G','I','N',0},
     {'T','_','O','B','J','_','E','N','D',0},
     {'T','_','A','R','R','_','B','E','G','I','N',0},
@@ -211,7 +211,7 @@ static const char *char2escape[256] = {
 #endif
 
 /* ===== HELPER FUNCTION ===== */
-static const char escape_array[36][8] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR = {
+static const char escape_array[36][8] ICACHE_RODATA_ATTR = {
     {'\\','u','0','0','0','0','\0','\0'},
     {'\\','u','0','0','0','1','\0','\0'},
     {'\\','u','0','0','0','2','\0','\0'},

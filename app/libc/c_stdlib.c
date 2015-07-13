@@ -58,7 +58,7 @@ const char *c_getenv(const char *__string)
 #include <string.h>
 //#include "mprec.h"
 
-double powersOf10[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR =   /* Table giving binary powers of 10.  Entry */
+double powersOf10[] ICACHE_RODATA_ATTR =   /* Table giving binary powers of 10.  Entry */
 {
     10.,            /* is 10^2^i.  Used to convert decimal */
     100.,           /* exponents into floating-point numbers. */

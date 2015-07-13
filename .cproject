@@ -29,8 +29,8 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.base.531984488" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.base">
 								<option id="gnu.c.compiler.option.include.paths.447310503" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nodemcu-firmware/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nodemcu-firmware/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/include}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1823936060" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

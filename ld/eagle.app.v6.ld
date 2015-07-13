@@ -119,10 +119,15 @@ SECTIONS
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     
     *(.rodata*)
+    *(.iram.text)
  
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+    . = ALIGN (4);
+    eraminfo = ABSOLUTE(.);
+    LONG(_lit4_end)
+    LONG(0x4010C000 - 8 - _lit4_end)
     _text_end = ABSOLUTE(.);
     _etext = .;
   } >iram1_0_seg :iram1_0_phdr
@@ -130,12 +135,13 @@ SECTIONS
   .lit4 : ALIGN(4)
   {
     _lit4_start = ABSOLUTE(.);
+    *(.iram.buf)
     *(*.lit4)
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
   } >iram1_0_seg :iram1_0_phdr
-
+  
   .data : ALIGN(4)
   {
     _data_start = ABSOLUTE(.);

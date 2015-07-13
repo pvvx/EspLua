@@ -12,7 +12,7 @@
 // (!) not use
 
 // from phy_chip_v6.o
-void  chip_v6_set_sense(void)
+void ICACHE_FLASH_ATTR chip_v6_set_sense(void)
 {
 	// ret.n
 }
@@ -25,19 +25,19 @@ void  chip_v6_get_sense(void)
 */
 
 // from phy_chip_v6.o
-int  chip_v6_unset_chanfreq(void)
+int ICACHE_FLASH_ATTR  chip_v6_unset_chanfreq(void)
 {
 	return 0;
 }
 
+/*
 // from slop_test()
-void  slop_wdt_feed(void)
+void ICACHE_FLASH_ATTR slop_wdt_feed(void)
 {
 	WDT_FEED = WDT_FEED_MAGIC;
 }
 
 
-/*
 int  data_collect(void)
 {
 	???

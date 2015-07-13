@@ -11,6 +11,8 @@
 #include "sdk/osapi.h"
 #include "sdk/add_sdk_func.h"
 
+extern void ets_run1(void);
+/*
 void ICACHE_RAM_ATTR delay_end(uint32 *px)
 {
 		ets_set_idle_cb(NULL, NULL);
@@ -25,18 +27,18 @@ void ICACHE_RAM_ATTR delay_end(uint32 *px)
 				  "ret.n;"
 		);
 }
-
+*/
 uint32 tt;
+extern volatile bool ets_run_ret;
 
 void ICACHE_RAM_ATTR delay_wait_cb(void *px)
 {
-//	ets_intr_lock();
 	tt = phy_get_mactime();
-	ets_set_idle_cb(delay_end, px);
-//	ets_intr_unlock();
+	ets_run_ret = true;
+//	ets_set_idle_cb(delay_end, px);
 }
 
-void task_delay_us(uint32 us)
+void ICACHE_RAM_ATTR task_delay_us(uint32 us)
 {
 	if(us < 512) ets_delay_us(us);
 	else	{
@@ -44,7 +46,7 @@ void task_delay_us(uint32 us)
 		ets_timer_disarm(&delay_timer);
 		ets_timer_setfn(&delay_timer, (ETSTimerFunc *)(delay_wait_cb), NULL);
 		ets_timer_arm_new(&delay_timer, us - 128, 0, 0);
-		ets_run();
+		ets_run1();
 	}
 }
 
@@ -57,7 +59,7 @@ void ICACHE_RAM_ATTR run_sdk_tasks(void)
 		ets_timer_disarm(&delay_timer);
 		ets_timer_setfn(&delay_timer, (ETSTimerFunc *)(delay_wait_cb), NULL);
 		ets_timer_arm_new(&delay_timer, 1024, 0, 0);
-		ets_run();
+		ets_run1();
     	tt=t;
 	}
 }

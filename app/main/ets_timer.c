@@ -3,7 +3,6 @@
  * Description: Alternate SDK (libmain.a)
  * Author: PV`
  * (c) PV` 2015
- * ver 0.0.0 (b1)
 *******************************************************************************/
 #include "user_config.h"
 #include "bios.h"

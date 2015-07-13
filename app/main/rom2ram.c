@@ -5,8 +5,28 @@
  */
 
 #include "user_config.h"
+#include "bios.h"
+#include "hw/esp8266.h"
+#include "rom2ram.h"
 
-void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
+extern char * _text_start; // start addr IRAM 
+
+#ifndef ICACHE_RAM_ATTR
+#define ICACHE_RAM_ATTR
+#endif
+#ifndef ICACHE_FLASH_ATTR
+#define ICACHE_FLASH_ATTR
+#endif
+
+int ICACHE_FLASH_ATTR iram_buf_init(void)
+{
+	 eraminfo.size = (uint32)(&_text_start) + ((((DPORT_BASE[9]>>3)&3)==3)? 0x08000 : 0x0C000) - (int)eraminfo.base;
+	 //ets_memset(eraminfo.base, 0, eraminfo.size);
+	 return eraminfo.size;
+}
+
+
+void ICACHE_RAM_ATTR copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -45,7 +65,7 @@ void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s4d1(unsigned char * p
 }
 
 
-void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
+void ICACHE_RAM_ATTR copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -84,56 +104,27 @@ void __attribute__((optimize("Os"))) ICACHE_RAM_ATTR copy_s1d4(void * pd, unsign
 	}
 }
 
-char __attribute__((optimize("Os"))) ICACHE_RAM_ATTR get_rom_chr(const char *ps)
+//extern void copy_s4d1(uint8 * pd, void * ps, uint32 len);
+
+bool ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
 {
-	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
-}
-/*
-unsigned int __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_strlen(void * ps)
-{
-	union {
-		unsigned char uc[4];
-		unsigned int ud;
-	}tmp;
-	if(ps == 0) return (0);
-	unsigned int len = 0;
-	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
-	unsigned int xlen = (unsigned int)ps & 3;
-	while(1) {
-		tmp.ud = *p;
-		do {
-			if(tmp.uc[xlen++] == 0) return len;
-			len++;
-		} while((xlen & 4) == 0);
-		xlen = 0;
-		p++;
-	}
+	if (addr + len > eraminfo.size) return false;
+	copy_s4d1(pd, (void *)((uint32)eraminfo.base + addr), len);
+	return true;
 }
 
-const char *__attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_strchr(const char * ps, char c)
+//extern void copy_s1d4(void * pd, uint8 * ps, uint32 len);
+
+bool ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *ps, uint32 len)
 {
-	union {
-		unsigned char uc[4];
-		unsigned int ud;
-	}tmp;
-	if(ps == 0) return (0);
-	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
-	unsigned int xlen = (unsigned int)ps & 3;
-	while(1) {
-		tmp.ud = *p;
-		do {
-			if(tmp.uc[xlen] == c) return (const char *)((unsigned int)p + xlen);
-			else if(tmp.uc[xlen] == 0) return (0);
-			xlen++;
-		} while((xlen & 4) == 0);
-		xlen = 0;
-		p++;
-	}
+	if (addr + len > eraminfo.size) return false;
+	copy_s1d4((void *)((uint32)eraminfo.base + addr), ps, len);
+	return true;
 }
 
-
-char * __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
+char * ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 {
+	if(pd_ == (0) || ps == (0) || maxlen == 0) return (0);
 	union {
 		unsigned char uc[4];
 		unsigned int ud;
@@ -141,9 +132,7 @@ char * __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_strcpy(char * pd_, vo
 	char * pd = pd_;
 	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
 	*pd = 0;
-	if(ps == (0)) return pd_;
 	char c;
-
 	unsigned int xlen = (unsigned int)ps & 3;
 	if(xlen) {
 		tmp.ud = *p++;
@@ -183,7 +172,102 @@ char * __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_strcpy(char * pd_, vo
 	return pd_;
 }
 
-int __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_memcmp( void * ps, const char * pd_, unsigned int len)
+#if 0
+unsigned int ICACHE_RAM_ATTR rom_strlen(void * ps)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	if(ps == 0) return (0);
+	unsigned int len = 0;
+	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
+	unsigned int xlen = (unsigned int)ps & 3;
+	while(1) {
+		tmp.ud = *p;
+		do {
+			if(tmp.uc[xlen++] == 0) return len;
+			len++;
+		} while((xlen & 4) == 0);
+		xlen = 0;
+		p++;
+	}
+}
+
+
+unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, void * ps)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	if(ps == 0 || pd == 0) return (0);
+	*pd = 0;
+	unsigned int len = 0;
+	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
+	unsigned int xlen = (unsigned int)ps & 3;
+	while(1) {
+		tmp.ud = *p;
+		char ch;
+		do {
+			ch = *pd++ = tmp.uc[xlen++];
+			if(ch == 0) return len;
+			len++;
+		} while((xlen & 4) == 0);
+		xlen = 0;
+		p++;
+	}
+}
+
+#endif
+
+char ICACHE_RAM_ATTR get_rom_chr(const char *ps)
+{
+	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
+}
+
+#if 0
+
+/*
+Name: strchr
+Prototype: char * strchr (const char *string, int c)
+Description:
+The strchr function finds the first occurrence of the character c (converted to a char) in the null-terminated string
+ beginning at string. The return value is a pointer to the located character, or a null pointer if no match was
+ found.
+
+For example,
+         strchr ("hello, world", 'l')
+              "llo, world"
+         strchr ("hello, world", '?')
+              NULL
+
+
+The terminating null character is considered to be part of the string, so you can use this function get a pointer to
+ the end of a string by specifying a null character as the value of the c argument. It would be better (but less
+ portable) to use strchrnul in this case, though. */
+const char * ICACHE_RAM_ATTR rom_strchr(const char * ps, char c)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	if(ps == 0) return (0);
+	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
+	unsigned int xlen = (unsigned int)ps & 3;
+	while(1) {
+		tmp.ud = *p;
+		do {
+			if(tmp.uc[xlen] == c) return (const char *)((unsigned int)p + xlen);
+			else if(tmp.uc[xlen] == 0) return (0);
+			xlen++;
+		} while((xlen & 4) == 0);
+		xlen = 0;
+		p++;
+	}
+}
+
+int ICACHE_RAM_ATTR rom_memcmp( void * ps, const char * pd_, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -223,4 +307,40 @@ int __attribute__((optimize("Os"))) ICACHE_RAM_ATTR rom_memcmp( void * ps, const
 	}
 	return 0;
 }
-*/
+
+/*
+Name: strrchr
+Prototype: char * strrchr (const char *string, int c)
+Description:
+The function strrchr is like strchr, except that it searches backwards
+ from the end of the string string (instead of forwards from the
+ front).
+For example,
+         strrchr ("hello, world", 'l')
+              "ld"	*/
+char * ICACHE_RAM_ATTR ets_strrchr(const char *string, int c)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	char * pret = (0);
+	if(string != 0) {
+		unsigned int *p = (unsigned int *)((unsigned int)string & (~3));
+		unsigned int xlen = (unsigned int)string & 3;
+		while(1) {
+			tmp.ud = *p;
+			do {
+				if(tmp.uc[xlen] == c) pret = (char *)((unsigned int)p + xlen);
+				else if(tmp.uc[xlen] == 0) break;
+				xlen++;
+			} while((xlen & 4) == 0);
+			xlen = 0;
+			p++;
+		}
+	}
+	return pret;
+}
+
+#endif
+

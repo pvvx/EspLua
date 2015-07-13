@@ -63,8 +63,6 @@ extern void output_redirect(const char *str);
 void c_sprintf(char* s, char *fmt, ...);
 #endif
 
-// extern char print_mem_buf[256];
-
 // #define c_vsprintf ets_vsprintf
 
 #define c_printf(...) do {	\

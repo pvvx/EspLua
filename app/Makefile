@@ -91,7 +91,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lmlwip	\
 	-lpp	\
 	-lnet80211	\
-	-lwpa	\
+	-lmwpa	\
 	-lssl	\
 	$(DEP_LIBS_eagle.app.v6)	\
 	-Wl,--end-group	\

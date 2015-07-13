@@ -36,14 +36,11 @@
 #define NODE_ERR
 #endif	/* NODE_ERROR */
 
-#ifndef ICACHE_STORE_ATTR
-#define ICACHE_STORE_ATTR  __attribute__((aligned(4)))
-#endif
 #ifndef ICACHE_RAM_ATTR
 #define ICACHE_RAM_ATTR __attribute__((section(".text")))
 #endif
 
-#define ICACHE_STR_LUA_ATTR __attribute__((aligned(4))) __attribute__((section("irom.text")))
+//#define ICACHE_STR_LUA_ATTR __attribute__((aligned(4), section("irom.text")))
 
 #define CLIENT_SSL_ENABLE
 #define GPIO_INTERRUPT_ENABLE

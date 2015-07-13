@@ -20,6 +20,7 @@
 #include "ets_sys.h"
 #include "driver/uart.h"
 #include "mem.h"
+#include "rom2ram.h"
 
 extern uint32 stack_low;
 
@@ -105,16 +106,15 @@ void user_init(void)
 #endif
 	stack_low = 0x5555AAAA;
     system_timer_reinit();
-    os_delay_us(1000);
-
+    iram_buf_init();
+    flash_size_init();
     os_printf("\nSDK version: %s\n", system_get_sdk_version());
 #ifdef NODE_DEBUG
      system_print_meminfo();
 #endif
     os_printf("Heap size: %u bytes.\n",system_get_free_heap_size());
-     eram_init();
-     flash_size_init();
     os_printf("Real Flash size: %u bytes.\n", flash_size);
+	if(eraminfo.size > 1024) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
 #ifndef NODE_DEBUG
      //system_set_os_print(0);
 #endif
