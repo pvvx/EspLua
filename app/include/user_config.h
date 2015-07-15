@@ -40,6 +40,15 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".text")))
 #endif
 
+#ifndef ICACHE_FLASH_ATTR
+#define ICACHE_FLASH_ATTR __attribute__((section(".text")))
+#endif
+
+
+#ifndef DATA_IRAM_ATTR
+#define DATA_IRAM_ATTR __attribute__((aligned(4), section(".iram.data")))
+#endif
+
 //#define ICACHE_STR_LUA_ATTR __attribute__((aligned(4), section("irom.text")))
 
 #define CLIENT_SSL_ENABLE

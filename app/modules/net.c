@@ -19,30 +19,30 @@
 #define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == IPADDR_ANY)
 
 #ifdef CLIENT_SSL_ENABLE
-unsigned char *default_certificate;
-unsigned int default_certificate_len = 0;
-unsigned char *default_private_key;
-unsigned int default_private_key_len = 0;
+unsigned char *default_certificate DATA_IRAM_ATTR;
+unsigned int default_certificate_len DATA_IRAM_ATTR; // = 0;
+unsigned char *default_private_key DATA_IRAM_ATTR;
+unsigned int default_private_key_len DATA_IRAM_ATTR; // = 0;
 #endif
 
 #define TCP ESPCONN_TCP
 #define UDP ESPCONN_UDP
 
-static ip_addr_t host_ip; // for dns
+static ip_addr_t host_ip DATA_IRAM_ATTR; // for dns
 
 #if 0
 static int expose_array(lua_State* L, char *array, unsigned short len);
 #endif
 
 #define MAX_SOCKET 5
-static int socket_num = 0;
-static int socket[MAX_SOCKET];
-static lua_State *gL = NULL;
+static int socket_num DATA_IRAM_ATTR; // = 0
+static int socket[MAX_SOCKET]  DATA_IRAM_ATTR;
+static lua_State *gL DATA_IRAM_ATTR; // = NULL;
 static int tcpserver_cb_connect_ref = LUA_NOREF;  // for tcp server connected callback
 static uint16_t tcp_server_timeover = 30;
 
-static struct espconn *pTcpServer = NULL;
-static struct espconn *pUdpServer = NULL;
+static struct espconn *pTcpServer DATA_IRAM_ATTR; // = NULL;
+static struct espconn *pUdpServer DATA_IRAM_ATTR; // = NULL;
 
 typedef struct lnet_userdata
 {
@@ -55,7 +55,7 @@ typedef struct lnet_userdata
   int cb_send_ref;
   int cb_dns_found_ref;
 #ifdef CLIENT_SSL_ENABLE
-  uint8_t secure;
+  int secure;
 #endif
 }lnet_userdata;
 

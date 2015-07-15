@@ -382,6 +382,8 @@ typedef struct __lua_load{
 
 int lua_main( int argc, char **argv );
 
+extern void set_lua_dojob(void *);
+
 /******************************************************************************
 * Copyright (C) 1994-2008 Lua.org, PUC-Rio.  All rights reserved.
 *

@@ -25,10 +25,12 @@ static s32_t my_spiffs_write(u32_t addr, u32_t size, u8_t *src) {
 
 static s32_t my_spiffs_erase(u32_t addr, u32_t size) {
 //	if(addr >> 24) addr -= INTERNAL_FLASH_START_ADDRESS;
+// os_printf("fs.erase: %p[%p]\n", addr, size);
+
   u32_t sect_first = addr >> 12;
   u32_t sect_last = (addr + size - 1) >> 12;
 	while( sect_first <= sect_last ) {
-		if((sect_first & 15) == 0 && (sect_first + 15) <= sect_last) {
+		if(sect_first > 128 && (sect_first & 15) == 0 && (sect_first + 15) <= sect_last) {
 			NODE_DBG("fs.erase_blk: 0x%x\n",sect_first);
 			if(flash_safe_erase_block(sect_first>>4) != 0) return SPIFFS_ERR_INTERNAL;
 			sect_first += 1<<4;
@@ -59,7 +61,7 @@ void spiffs_mount() {
   spiffs_config cfg;
 	if(flash_size <= INTERNAL_FLASH_SIZE) {
 		cfg.phys_addr = ((uint32_t)_flash_used_end + SPI_FLASH_SEC_SIZE - INTERNAL_FLASH_START_ADDRESS) & ( ~(SPI_FLASH_SEC_SIZE - 1));
-		cfg.phys_size = SYS_PARAM_SEC_START*SPI_FLASH_SEC_SIZE - cfg.phys_addr;
+		cfg.phys_size = (SYS_PARAM_SEC_START * SPI_FLASH_SEC_SIZE) - cfg.phys_addr;
 	}
 	else {
 		cfg.phys_addr = INTERNAL_FLASH_SIZE;
@@ -93,7 +95,7 @@ int myspiffs_format( void )
   u32_t start, size;
 	if(flash_size <= INTERNAL_FLASH_SIZE) {
 		start = ((uint32_t)_flash_used_end + SPI_FLASH_SEC_SIZE - INTERNAL_FLASH_START_ADDRESS) & ( ~(SPI_FLASH_SEC_SIZE - 1));
-		size = SYS_PARAM_SEC_START*SPI_FLASH_SEC_SIZE - start;
+		size = (SYS_PARAM_SEC_START*SPI_FLASH_SEC_SIZE) - start;
 	}
 	else {
 		start = INTERNAL_FLASH_SIZE;

@@ -38,7 +38,9 @@ static int crypto_sha1( lua_State* L )
 }
 
 
-static const char* bytes64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+//static const char* bytes64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+// ld: PROVIDE ( base64_table = 0x3FFFD600 );
+extern const uint8 base64_table[];
 /**
   * encoded = crypto.toBase64(raw)
   *
@@ -55,10 +57,10 @@ static int crypto_base64_encode( lua_State* L )
     int a = msg[i];
     int b = (i + 1 < len) ? msg[i + 1] : 0;
     int c = (i + 2 < len) ? msg[i + 2] : 0;
-    out[j++] = bytes64[a >> 2];
-    out[j++] = bytes64[((a & 3) << 4) | (b >> 4)];
-    out[j++] = (i + 1 < len) ? bytes64[((b & 15) << 2) | (c >> 6)] : 61;
-    out[j++] = (i + 2 < len) ? bytes64[(c & 63)] : 61;
+    out[j++] = base64_table[a >> 2];
+    out[j++] = base64_table[((a & 3) << 4) | (b >> 4)];
+    out[j++] = (i + 1 < len) ? base64_table[((b & 15) << 2) | (c >> 6)] : 61;
+    out[j++] = (i + 2 < len) ? base64_table[(c & 63)] : 61;
   }
   lua_pushlstring(L, out, j);
   c_free(out);

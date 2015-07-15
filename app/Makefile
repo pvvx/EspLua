@@ -77,7 +77,7 @@ COMPONENTS_eagle.app.v6 = \
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib        \
 	-Wl,--gc-sections \
-	-Xlinker -Map=mapfile \
+	-Wl,-Map -Wl,$(@:.out=.map) \
 	-nostdlib	\
     -T$(LD_FILE)   \
 	-Wl,--no-check-sections	\

@@ -21,7 +21,7 @@
 extern UartDevice UartDev;
 
 //LOCAL void ICACHE_RAM_ATTR uart0_rx_intr_handler(void *para);
-
+extern int run_readline;
 extern void uart_rx_intr_handler(void *para);
 
 /******************************************************************************
@@ -202,7 +202,7 @@ uart0_rx_intr_handler(void *para)
         // insert here for get one command line from uart
         if (RcvChar == '\r' || RcvChar == '\n' ) {
             pRxBuff->BuffState = WRITE_OVER;
-//            set_run_readline();
+            run_readline++;
         }
         
         if (pRxBuff->pWritePos == (pRxBuff->pRcvMsgBuff + RX_BUFF_SIZE)) {

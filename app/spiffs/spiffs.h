@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 
+#include "user_config.h"
 #include "c_stdio.h"
 #include "spiffs_config.h"
 
@@ -86,17 +87,16 @@ typedef void (*spiffs_check_callback)(spiffs_check_type type, spiffs_check_repor
     u32_t arg1, u32_t arg2);
 
 #ifndef SPIFFS_DBG
-#define SPIFFS_DBG(...) \
-    print(__VA_ARGS__)
+#define SPIFFS_DBG(...)  		// c_print(__VA_ARGS__)
 #endif
 #ifndef SPIFFS_GC_DBG
-#define SPIFFS_GC_DBG(...) printf(__VA_ARGS__)
+#define SPIFFS_GC_DBG(...)		// c_printf(__VA_ARGS__)
 #endif
 #ifndef SPIFFS_CACHE_DBG
-#define SPIFFS_CACHE_DBG(...) printf(__VA_ARGS__)
+#define SPIFFS_CACHE_DBG(...)	// c_printf(__VA_ARGS__)
 #endif
 #ifndef SPIFFS_CHECK_DBG
-#define SPIFFS_CHECK_DBG(...) printf(__VA_ARGS__)
+#define SPIFFS_CHECK_DBG(...)	// c_printf(__VA_ARGS__)
 #endif
 
 /* Any write to the filehandle is appended to end of the file */
@@ -477,6 +477,8 @@ u32_t SPIFFS_buffer_bytes_for_cache(spiffs *fs, u32_t num_pages);
 #if SPIFFS_CACHE
 #endif
 
+void myspiffs_mount();
+void myspiffs_unmount();
 int myspiffs_open(const char *name, int flags);
 int myspiffs_close( int fd );
 size_t myspiffs_write( int fd, const void* ptr, size_t len );

@@ -1,7 +1,6 @@
 #ifndef __ESPCONN_H__
 #define __ESPCONN_H__
 
-#include "c_types.h"
 #include "ip_addr.h"
 
 typedef sint8 err_t;

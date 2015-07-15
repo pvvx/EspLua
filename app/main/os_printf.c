@@ -11,7 +11,7 @@
 #include "os_printf.h"
 
 //extern uint8 _mem_buf[2924]; // пустой буфер в области RAM_BIOS: 0x3FFFE360..0x3FFFEA80 [1824 байт]
-char * _sprintf_buf __attribute__((aligned(4), section(".iram.text")));
+char * _sprintf_buf DATA_IRAM_ATTR;
 extern char print_mem_buf[256]; // 0x3FFFDFF0 или 0x3FFFE364..0x3FFFEA80
 #if 0
 extern bool system_get_os_print(void);

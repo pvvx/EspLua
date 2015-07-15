@@ -161,7 +161,6 @@ s32_t spiffs_obj_lu_find_entry_visitor(
           cur_entry - entry_offset < entries_per_page && // for non-last obj lookup pages
           cur_entry < (int)SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs)) // for last obj lookup page
       {
-    	run_sdk_tasks();
         if ((flags & SPIFFS_VIS_CHECK_ID) == 0 || obj_lu_buf[cur_entry-entry_offset] == obj_id) {
           if (block_ix) *block_ix = cur_block;
           if (lu_entry) *lu_entry = cur_entry;

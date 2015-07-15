@@ -271,7 +271,6 @@ s32_t spiffs_gc_find_candidate(
       while (res == SPIFFS_OK &&
           cur_entry - entry_offset < entries_per_page &&
           cur_entry < (int)(SPIFFS_PAGES_PER_BLOCK(fs)-SPIFFS_OBJ_LOOKUP_PAGES(fs))) {
-    	run_sdk_tasks();
         spiffs_obj_id obj_id = obj_lu_buf[cur_entry-entry_offset];
         if (obj_id == SPIFFS_OBJ_ID_FREE) {
           // when a free entry is encountered, scan logic ensures that all following entries are free also
@@ -407,7 +406,6 @@ s32_t spiffs_gc_clean(spiffs *fs, spiffs_block_ix bix) {
       // check each entry
       while (scan && res == SPIFFS_OK &&
           cur_entry - entry_offset < entries_per_page && cur_entry < (int)(SPIFFS_PAGES_PER_BLOCK(fs)-SPIFFS_OBJ_LOOKUP_PAGES(fs))) {
-    	run_sdk_tasks();
         spiffs_obj_id obj_id = obj_lu_buf[cur_entry-entry_offset];
         cur_pix = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, bix, cur_entry);
 

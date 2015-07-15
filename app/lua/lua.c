@@ -22,7 +22,7 @@
 
 #include "os_type.h"
 
-os_timer_t lua_timer;
+// os_timer_t lua_timer;
 LOCAL os_timer_t readline_timer;
 
 lua_State *globalL = NULL;
@@ -432,7 +432,7 @@ static int pmain (lua_State *L) {
   return 0;
 }
 
-void dojob(lua_Load *load);
+void dojob_cb(lua_Load *load);
 void readline(lua_Load *load);
 char line_buffer[LUA_MAXINPUT];
 
@@ -462,10 +462,11 @@ int lua_main (int argc, char **argv) {
   gLoad.prmt = get_prompt(L, 1);
 
   // dojob(&gLoad);
-  os_timer_disarm(&lua_timer);
+/*  os_timer_disarm(&lua_timer);
   os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, &gLoad);
-  os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat
-
+  os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat */
+  set_lua_dojob(&gLoad);
+  
   NODE_DBG("Heap size::%d.\n",system_get_free_heap_size());
   legc_set_mode( L, EGC_ALWAYS, 4096 );
   // legc_set_mode( L, EGC_ON_MEM_LIMIT, 4096 );
@@ -543,19 +544,19 @@ void dojob_cb(lua_Load *load){
   c_memset(load->line, 0, load->len);
   os_timer_disarm(&readline_timer);
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
-  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
+  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat 
   c_puts(load->prmt);
   // NODE_DBG("dojob() is called with firstline.\n");
 }
 
-
+/*
 void ICACHE_RAM_ATTR dojob(lua_Load *load)
 {
 	os_timer_disarm(&lua_timer);
 	os_timer_disarm(&readline_timer);
 	ets_set_idle_cb(dojob_cb, load);
 }
-
+*/
 
 #ifdef DEVKIT_VERSION_0_9
 extern void key_long_press(void *arg);
@@ -665,10 +666,11 @@ void readline(lua_Load *load){
 //          set_run_radline(load);
         } else {
           load->done = 1;
-          os_timer_disarm(&lua_timer);
+          
+/*          os_timer_disarm(&lua_timer);
           os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
-          os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat
-//          set_run_dojob(load);
+          os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat */
+          set_lua_dojob(load);
         }
         continue;
       }
@@ -715,3 +717,5 @@ void readline(lua_Load *load){
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
   os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
 }
+
+

@@ -9,19 +9,16 @@
 
 #include "c_types.h"
 
-static os_timer_t alarm_timer[NUM_TMR];
+static os_timer_t alarm_timer[NUM_TMR] DATA_IRAM_ATTR;
 static int alarm_timer_cb_ref[NUM_TMR] = {LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF,LUA_NOREF};
-static bool alarm_timer_repeat[NUM_TMR]= {0,0,0,0,0,0,0};
-unsigned id_timer;
+static uint32 alarm_timer_repeat DATA_IRAM_ATTR; //[NUM_TMR] = {0,0,0,0,0,0,0};
 
-///void alarm_timer_common(lua_State* L, unsigned id){
-void alarm_timer_common_cb(lua_State* L){
+void alarm_timer_common_cb(lua_State* L, unsigned id){
   ets_set_idle_cb(NULL,NULL);
-  unsigned id = id_timer;
   if(alarm_timer_cb_ref[id] == LUA_NOREF)
     return;
   lua_rawgeti(L, LUA_REGISTRYINDEX, alarm_timer_cb_ref[id]);
-  if(alarm_timer_repeat[id]==0)
+  if((alarm_timer_repeat & (1<<id)) == 0)
   {
 	  if(alarm_timer_cb_ref[id] != LUA_NOREF)
 		  luaL_unref(L, LUA_REGISTRYINDEX, alarm_timer_cb_ref[id]);
@@ -30,11 +27,9 @@ void alarm_timer_common_cb(lua_State* L){
   lua_call(L, 0, 0);
 }
 
-void alarm_timer_common(lua_State* L, unsigned id)
-{
-	ets_set_idle_cb(alarm_timer_common_cb, L);
-	id_timer = id;
-}
+extern void set_lua_timer(lua_State* L, unsigned id);
+
+#define alarm_timer_common(a,b) set_lua_timer(a,b)
 
 void alarm_timer_cb0(void *arg){
   if( !arg )
@@ -121,7 +116,8 @@ static int tmr_alarm( lua_State* L )
     stack++;
     if ( repeat != 1 && repeat != 0 )
       return luaL_error( L, "wrong arg type" );
-    alarm_timer_repeat[id]=repeat;
+    alarm_timer_repeat &= ~(repeat << id);
+    alarm_timer_repeat |= repeat << id;
   }
 
   // luaL_checkanyfunction(L, stack);
@@ -155,7 +151,7 @@ static int tmr_stop( lua_State* L )
 // Lua: wdclr()
 static int tmr_wdclr( lua_State* L )
 {
-  task_delay_us(1024);
+  run_sdk_tasks();
   // update_key_led();
   return 0;  
 }

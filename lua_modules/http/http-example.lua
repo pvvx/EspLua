@@ -27,11 +27,10 @@ require("http").createServer(80, function(req, res)
     if not chunk then
       -- reply
       --res:finish("")
-      --res:send(nil, 200)
-      --res:send_header("Connection", "close")
-      --res:send("Hello, world!")
-      --res:finish()
-      res:finish("Hello, world!")
+      res:send(nil, 200)
+      res:send_header("Connection", "close")
+      res:send("Hello, world!")
+      res:finish()
     end
   end
   -- or just do something not waiting till body (if any) comes

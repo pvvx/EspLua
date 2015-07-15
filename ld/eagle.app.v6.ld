@@ -135,7 +135,7 @@ SECTIONS
   .lit4 : ALIGN(4)
   {
     _lit4_start = ABSOLUTE(.);
-    *(.iram.buf)
+    *(.iram.data)
     *(*.lit4)
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)

@@ -845,12 +845,11 @@ s32_t SPIFFS_size(spiffs *fs, spiffs_file fh) {
 }
 
 #if SPIFFS_TEST_VISUALISATION
-
-
 s32_t SPIFFS_vis(spiffs *fs) {
   s32_t res = SPIFFS_OK;
   SPIFFS_API_CHECK_MOUNT(fs);
   SPIFFS_LOCK(fs);
+
   int entries_per_page = (SPIFFS_CFG_LOG_PAGE_SZ(fs) / sizeof(spiffs_obj_id));
   spiffs_obj_id *obj_lu_buf = (spiffs_obj_id *)fs->lu_work;
   spiffs_block_ix bix = 0;
@@ -888,9 +887,8 @@ s32_t SPIFFS_vis(spiffs *fs) {
         }
       } // per entry
       obj_lookup_page++;
-
     } // per object lookup page
-
+    
     spiffs_obj_id erase_count;
     res = _spiffs_rd(fs, SPIFFS_OP_C_READ | SPIFFS_OP_T_OBJ_LU2, 0,
         SPIFFS_ERASE_COUNT_PADDR(fs, bix),
@@ -904,7 +902,6 @@ s32_t SPIFFS_vis(spiffs *fs) {
     }
 
     bix++;
-    run_sdk_tasks();
   } // per block
 
   spiffs_printf("phys_addr:   %p\n", fs->cfg.phys_addr);
@@ -918,6 +915,7 @@ s32_t SPIFFS_vis(spiffs *fs) {
   u32_t total, used;
   SPIFFS_info(fs, &total, &used);
   spiffs_printf("used:        %i of %i\n", used, total);
+
   SPIFFS_UNLOCK(fs);
   return res;
 }

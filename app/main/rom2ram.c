@@ -8,8 +8,7 @@
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "rom2ram.h"
-
-extern char * _text_start; // start addr IRAM 
+#include "sdk/osapi.h"
 
 #ifndef ICACHE_RAM_ATTR
 #define ICACHE_RAM_ATTR
@@ -18,10 +17,18 @@ extern char * _text_start; // start addr IRAM
 #define ICACHE_FLASH_ATTR
 #endif
 
+extern uint32 _text_start[]; // start addr IRAM
+extern uint32 _lit4_start[]; // addr data buf IRAM
+
 int ICACHE_FLASH_ATTR iram_buf_init(void)
 {
-	 eraminfo.size = (uint32)(&_text_start) + ((((DPORT_BASE[9]>>3)&3)==3)? 0x08000 : 0x0C000) - (int)eraminfo.base;
-	 //ets_memset(eraminfo.base, 0, eraminfo.size);
+	 uint32 * end = &_text_start[((((DPORT_BASE[9]>>3)&3)==3)? (0x08000 >> 2) : (0x0C000 >> 2))];
+	 eraminfo.size = (int32)((uint32)(end) - (uint32)eraminfo.base);
+	 if(eraminfo.size > 0) {
+		 uint32 * ptr = _lit4_start;
+		 while(ptr < end) *ptr++ = 0;
+	 }
+	 else os_printf("No free IRAM!");
 	 return eraminfo.size;
 }
 

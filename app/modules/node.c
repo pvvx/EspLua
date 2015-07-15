@@ -234,8 +234,8 @@ static int node_key( lua_State* L )
 #endif
 
 extern lua_Load gLoad;
-extern os_timer_t lua_timer;
-extern void dojob(lua_Load *load);
+//extern os_timer_t lua_timer;
+extern void dojob_cb(lua_Load *load);
 // Lua: input("string")
 static int node_input( lua_State* L )
 {
@@ -252,10 +252,10 @@ static int node_input( lua_State* L )
       NODE_DBG("Get command:\n");
       NODE_DBG(load->line); // buggy here
       NODE_DBG("\nResult(if any):\n");
-      os_timer_disarm(&lua_timer);
+/*      os_timer_disarm(&lua_timer);
       os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
-      os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat
-//    set_run_dojob(load);
+      os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat */
+	  set_lua_dojob(load);
     }
   }
   return 0;

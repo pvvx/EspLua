@@ -2,9 +2,9 @@
 ------------------------------------------------------------------------------
       data|        Initialized Data (RAM)|    3FFE8000|    3FFE8AE0|    2784
     rodata|           ReadOnly Data (RAM)|    3FFE8AE0|    3FFE8AE8|       8
-       bss|      Uninitialized Data (RAM)|    3FFE8B68|    3FFF2A10|   40616
-      text|            Cached Code (IRAM)|    40100000|    4010A540|   42304
-irom0_text|           Uncached Code (SPI)|    4020C000|    4026C1E0|  393696
-Total Used RAM : 43408
-Free RAM : 38512
-Free IRam : -9518 (+16384)
+       bss|      Uninitialized Data (RAM)|    3FFE8B68|    3FFF28E8|   40320
+      text|            Cached Code (IRAM)|    40100000|    4010ACAC|   44204
+irom0_text|           Uncached Code (SPI)|    4020C000|    4026B9FC|  391676
+Total Used RAM : 43112
+Free RAM : 38808
+Free IRam : -11418 (+16384)

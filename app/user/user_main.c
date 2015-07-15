@@ -25,30 +25,42 @@
 extern uint32 stack_low;
 
 #define SIG_LUA 0
-#define TASK_QUEUE_LEN 4
-os_event_t *taskQueue;
+#define SIG_DOJOB 1
+#define SIG_TIMERS 2
+#define SIG_TIMERE (2+6)
+#define SIG_FSMNT 100
+#define TASK_QUEUE_LEN 8
+
+//os_event_t *taskQueue DATA_IRAM_ATTR;
+os_event_t lua_taskQueue[4] DATA_IRAM_ATTR;
+
+extern void dojob_cb(void *);
+extern void alarm_timer_common_cb(void * a, unsigned b);
+extern void spiffs_mount();
 
 void task_lua(os_event_t *e){
     char* lua_argv[] = { (char *)"lua", (char *)"-i", NULL };
-    test_system_stack();
     NODE_DBG("Task task_lua started.\n");
-    switch(e->sig){
-        case SIG_LUA:
-            NODE_DBG("SIG_LUA received.\n");
-            lua_main( 2, lua_argv );
-            test_system_stack();
-            break;
-        default:
-            break;
+    if(e->sig == SIG_DOJOB) {
+    	dojob_cb((void *)e->par);
     }
+    else if(e->sig >= SIG_TIMERS && e->sig <= SIG_TIMERE) {
+    	alarm_timer_common_cb((void *)e->par, e->sig - SIG_TIMERS);
+    }
+    else if(e->sig == SIG_LUA) {
+        NODE_DBG("SIG_LUA received.\n");
+        lua_main( 2, lua_argv );
+    }
+    else if(e->sig == SIG_FSMNT) {
+        spiffs_mount();
+    	system_os_post(USER_TASK_PRIO_0, SIG_LUA, 's');
+    }
+
 }
 void task_init(void){
-    taskQueue = (os_event_t *)os_malloc(sizeof(os_event_t) * TASK_QUEUE_LEN);
-    system_os_task(task_lua, USER_TASK_PRIO_0, taskQueue, TASK_QUEUE_LEN);
+//    taskQueue = (os_event_t *)os_malloc(sizeof(os_event_t) * TASK_QUEUE_LEN);
+    system_os_task(task_lua, USER_TASK_PRIO_0, lua_taskQueue, TASK_QUEUE_LEN);
 }
-
-
-extern void spiffs_mount();
 
 
 void user_rf_pre_init(void)
@@ -71,7 +83,7 @@ void nodemcu_init(void)
         return;
     }
     
-    spiffs_mount();
+    // spiffs_mount();
 
     // myspiffs_format();
 #ifdef DEVELOP_VERSION
@@ -87,8 +99,19 @@ void nodemcu_init(void)
     // lua_main( 3, lua_argv );
     // NODE_DBG("Flash sec num: 0x%x\n", flash_get_sec_num());
     task_init();
-    system_os_post(USER_TASK_PRIO_0,SIG_LUA,'s');
+    system_os_post(USER_TASK_PRIO_0, SIG_FSMNT, 0);
 }
+
+void set_lua_dojob(void *a)
+{
+	system_os_post(USER_TASK_PRIO_0, SIG_DOJOB, (uint32)a);
+}
+
+void set_lua_timer(void *a, int i)
+{
+	system_os_post(USER_TASK_PRIO_0, SIG_TIMERS+i, (uint32)a);
+}
+
 
 /******************************************************************************
  * FunctionName : user_init
@@ -108,13 +131,12 @@ void user_init(void)
     system_timer_reinit();
     iram_buf_init();
     flash_size_init();
-    os_printf("\nSDK version: %s\n", system_get_sdk_version());
 #ifdef NODE_DEBUG
      system_print_meminfo();
 #endif
-    os_printf("Heap size: %u bytes.\n",system_get_free_heap_size());
+    os_printf("\nStart Heap size: %u bytes.\n",system_get_free_heap_size());
     os_printf("Real Flash size: %u bytes.\n", flash_size);
-	if(eraminfo.size > 1024) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
+	if(eraminfo.size > 0) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
 #ifndef NODE_DEBUG
      //system_set_os_print(0);
 #endif

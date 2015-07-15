@@ -22,7 +22,7 @@
 #define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
 #endif
 
-uint32_t flash_size;
+uint32_t flash_size DATA_IRAM_ATTR;
 
 #ifndef USE_PVV_SPIFLASH
 //=============================================================================
@@ -171,7 +171,7 @@ void flash_size_init(void)
 {
 	flash_size = spi_flash_real_size();
 }
-
+/*
 uint8_t byte_of_aligned_array(const uint8_t *aligned_array, uint32_t index)
 {
     if ( (((uint32_t)aligned_array) % 4) != 0 )
@@ -183,7 +183,7 @@ uint8_t byte_of_aligned_array(const uint8_t *aligned_array, uint32_t index)
     uint8_t *p = (uint8_t *) (&v);
     return p[ (index % 4) ];
 }
-
+*/
 
 /******************************************************************************
  * FunctionName : spi_flash_write
