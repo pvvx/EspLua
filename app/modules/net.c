@@ -28,7 +28,7 @@ unsigned int default_private_key_len DATA_IRAM_ATTR; // = 0;
 #define TCP ESPCONN_TCP
 #define UDP ESPCONN_UDP
 
-static ip_addr_t host_ip DATA_IRAM_ATTR; // for dns
+static ip_addr_t host_ip; // for dns
 
 #if 0
 static int expose_array(lua_State* L, char *array, unsigned short len);

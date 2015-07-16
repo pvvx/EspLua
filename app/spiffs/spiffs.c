@@ -1,7 +1,7 @@
 #include "c_stdio.h"
 #include "platform.h"
 #include "spiffs.h"
-  
+
 spiffs fs;
 
 extern char _flash_used_end[];
@@ -24,20 +24,19 @@ static s32_t my_spiffs_write(u32_t addr, u32_t size, u8_t *src) {
 
 
 static s32_t my_spiffs_erase(u32_t addr, u32_t size) {
-//	if(addr >> 24) addr -= INTERNAL_FLASH_START_ADDRESS;
-// os_printf("fs.erase: %p[%p]\n", addr, size);
-
   u32_t sect_first = addr >> 12;
   u32_t sect_last = (addr + size - 1) >> 12;
 	while( sect_first <= sect_last ) {
-		if(sect_first > 128 && (sect_first & 15) == 0 && (sect_first + 15) <= sect_last) {
-			NODE_DBG("fs.erase_blk: 0x%x\n",sect_first);
+		if(sect_first >= FLASH_SEC_NUM && (sect_first & 15) == 0 && (sect_first + 15) <= sect_last) {
+			NODE_DBG("fs.erase_blk: 0x%x\n", sect_first);
 			if(flash_safe_erase_block(sect_first>>4) != 0) return SPIFFS_ERR_INTERNAL;
 			sect_first += 1<<4;
 		}
 		else {
-			NODE_DBG("fs.erase_sec: 0x%x\n",sect_first);
-			if(flash_safe_erase_sector(sect_first++) != 0) return SPIFFS_ERR_INTERNAL;
+			NODE_DBG("fs.erase_sec: 0x%x\n", sect_first);
+			if(flash_safe_erase_sector(sect_first) != 0 && flash_safe_erase_sector(sect_first) != 0 )
+				return SPIFFS_ERR_INTERNAL;
+			sect_first++;
 		}
 		run_sdk_tasks();
 	}
@@ -84,7 +83,7 @@ void spiffs_mount() {
 			sizeof(spiffs_cache),
 			// myspiffs_check_callback);
 			0);
-	NODE_DBG("mount res: %i\n", res);
+	NODE_DBG("mount res: %d\n", res);
 }
 
 // FS formatting function

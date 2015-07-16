@@ -106,7 +106,7 @@ CPP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
 OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
 #CCFLAGS += -Os 
-CCFLAGS += -std=gnu90 -ffunction-sections -fno-jump-tables -fdata-sections
+CCFLAGS += -g -std=gnu90 -ffunction-sections -fno-jump-tables -fdata-sections
 # -ffunction-sections -fno-jump-tables -fdata-sections -foptimize-register-move -mno-target-align 
 
 CSRCS ?= $(wildcard *.c)

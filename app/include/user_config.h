@@ -11,6 +11,7 @@
 #define USE_MAX_IRAM 48k
 
 // #define DEVELOP_VERSION
+//#define NODE_DEBUG
 
 #define USE_OPTIMIZE_PRINTF
 
@@ -22,8 +23,8 @@
 #define NODE_ERROR
 
 #ifdef NODE_DEBUG
-#define NODE_DBG c_printf
-#define NODE_DBG_ c_printf_
+#define NODE_DBG os_printf
+#define NODE_DBG_ os_printf_plus
 #else
 #define NODE_DBG
 #define NODE_DBG_
@@ -44,6 +45,7 @@
 #define ICACHE_FLASH_ATTR __attribute__((section(".text")))
 #endif
 
+#define ICACHE_STORE_ATTR
 
 #ifndef DATA_IRAM_ATTR
 #define DATA_IRAM_ATTR __attribute__((aligned(4), section(".iram.data")))
@@ -58,6 +60,8 @@
 #define BUILD_SPIFFS	1
 
 // #define LUA_NUMBER_INTEGRAL
+
+#define USE_ROM_UART_FUNCS
 
 #define LUA_OPTRAM
 #ifdef LUA_OPTRAM

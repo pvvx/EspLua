@@ -22,12 +22,14 @@
 
 #include "os_type.h"
 
-// os_timer_t lua_timer;
-LOCAL os_timer_t readline_timer;
+//os_timer_t lua_timer;
+LOCAL os_timer_t readline_timer DATA_IRAM_ATTR;
 
 lua_State *globalL = NULL;
 
-lua_Load gLoad;
+lua_Load gLoad DATA_IRAM_ATTR;
+
+char line_buffer[LUA_MAXINPUT];
 
 static const char *progname = LUA_PROGNAME;
 
@@ -140,13 +142,13 @@ static void print_version (void) {
   l_message(NULL, "\n" NODE_VERSION " " BUILD_DATE "  powered by " LUA_RELEASE);
 }
 
-
+#if 0
 static int getargs (lua_State *L, char **argv, int n) {
   int narg;
   int i;
   int argc = 0;
-  while (argv[argc]) argc++;  /* count total number of arguments */
-  narg = argc - (n + 1);  /* number of arguments to the script */
+  while (argv[argc]) argc++;  // count total number of arguments
+  narg = argc - (n + 1);  // number of arguments to the script
   luaL_checkstack(L, narg + 3, "too many arguments to script");
   for (i=n+1; i < argc; i++)
     lua_pushstring(L, argv[i]);
@@ -157,6 +159,7 @@ static int getargs (lua_State *L, char **argv, int n) {
   }
   return narg;
 }
+#endif
 
 #if 0
 static int dofile (lua_State *L, const char *name) {
@@ -432,9 +435,7 @@ static int pmain (lua_State *L) {
   return 0;
 }
 
-void dojob_cb(lua_Load *load);
 void readline(lua_Load *load);
-char line_buffer[LUA_MAXINPUT];
 
 #ifdef LUA_RPC
 int main (int argc, char **argv) {
@@ -452,7 +453,6 @@ int lua_main (int argc, char **argv) {
   s.argv = argv;
   status = lua_cpcall(L, &pmain, &s);
   report(L, status);
-
   gLoad.L = L;
   gLoad.firstline = 1;
   gLoad.done = 0;
@@ -467,6 +467,7 @@ int lua_main (int argc, char **argv) {
   os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat */
   set_lua_dojob(&gLoad);
   
+
   NODE_DBG("Heap size::%d.\n",system_get_free_heap_size());
   legc_set_mode( L, EGC_ALWAYS, 4096 );
   // legc_set_mode( L, EGC_ON_MEM_LIMIT, 4096 );
@@ -483,8 +484,6 @@ int log_fd = -1;
 int noparse = 0;
 #endif
 
-extern void ets_set_idle_cb(void *routine, void *arg);
-
 void dojob_cb(lua_Load *load){
   size_t l, rs;
   int status;
@@ -494,7 +493,6 @@ void dojob_cb(lua_Load *load){
   const char *oldprogname = progname;
   progname = NULL;
   
-  ets_set_idle_cb(NULL, NULL);
   do{
     if(load->done == 1){
       l = c_strlen(b);
@@ -544,19 +542,10 @@ void dojob_cb(lua_Load *load){
   c_memset(load->line, 0, load->len);
   os_timer_disarm(&readline_timer);
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
-  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat 
+  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
   c_puts(load->prmt);
   // NODE_DBG("dojob() is called with firstline.\n");
 }
-
-/*
-void ICACHE_RAM_ATTR dojob(lua_Load *load)
-{
-	os_timer_disarm(&lua_timer);
-	os_timer_disarm(&readline_timer);
-	ets_set_idle_cb(dojob_cb, load);
-}
-*/
 
 #ifdef DEVKIT_VERSION_0_9
 extern void key_long_press(void *arg);
@@ -599,29 +588,34 @@ void update_key_led(){
 }
 #endif
 
-#ifndef uart_putc
-#define uart_putc uart0_putc
-#endif
-extern bool uart_on_data_cb(const char *buf, size_t len);
-extern bool uart0_echo;
-extern bool run_input;
-extern uint16_t need_len;
-extern int16_t end_char;
 
-#if 1
+#ifdef USE_ROM_UART_FUNCS
 #include "driver/uart.h"
 extern UartDevice UartDev;
 extern int uart_rx_readbuff(RcvMsgBuff * rcvmsg, uint8 *dst);
 #define uart_getc(a) uart_rx_readbuff(&UartDev.rcv_buff, a)
 #endif
 
+#ifndef uart_putc
+#define uart_putc uart0_putc
+#endif
+
+extern bool uart_on_data_cb(const char *buf, size_t len);
+extern bool uart0_echo;
+extern bool run_input;
+extern uint16_t need_len;
+extern int16_t end_char;
 void readline(lua_Load *load){
-	// NODE_DBG("readline() is called.\n");
+  // NODE_DBG("readline() is called.\n");
 #ifdef DEVKIT_VERSION_0_9
   update_key_led();
 #endif
   char ch;
-  while (uart_getc(&ch)==0)
+#ifdef USE_ROM_UART_FUNCS
+  while (uart_getc(&ch) == 0)
+#else
+  while (uart_getc(&ch))
+#endif
   {
     if(run_input)
     {
@@ -632,9 +626,9 @@ void readline(lua_Load *load){
       {
         if (load->line_position > 0)
         {
-          if(uart0_echo) uart_putc(0x08);
-          if(uart0_echo) uart_putc(' ');
-          if(uart0_echo) uart_putc(0x08);
+          if(uart0_echo) { uart_putc(0x08); uart_putc(' '); uart_putc(0x08); }
+//          if(uart0_echo) uart_putc(' ');
+//          if(uart0_echo) uart_putc(0x08);
           load->line_position--;
         }
         load->line[load->line_position] = 0;
@@ -663,10 +657,8 @@ void readline(lua_Load *load){
           os_timer_disarm(&readline_timer);
           os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
           os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
-//          set_run_radline(load);
         } else {
           load->done = 1;
-          
 /*          os_timer_disarm(&lua_timer);
           os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
           os_timer_arm(&lua_timer, READLINE_INTERVAL, 0);   // no repeat */
@@ -717,5 +709,3 @@ void readline(lua_Load *load){
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
   os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
 }
-
-

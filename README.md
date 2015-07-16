@@ -32,11 +32,11 @@
 #Стартовый лог c парой команд
 
 ```lua
-EspLua.ru 1.2.0 build 20150715  powered by Lua 5.1.4
+EspLua.ru 1.2.0 build 20150716  powered by Lua 5.1.4
 lua: cannot open init.lua
 > tmr.delay(5000000)
 > =node.heap()
-30576
+30400
 ```
 
 
@@ -82,7 +82,7 @@ esp_init_data_default.bin: 0x7C000<br />
 blank.bin: 0x7E000<br />
 
 #Cкорость передачи RS-232 TTL по умолчанию
-baudrate:9600
+baudrate: 115200
 
 #Начните игру
 

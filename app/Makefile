@@ -93,6 +93,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lnet80211	\
 	-lmwpa	\
 	-lssl	\
+	-lsmartconfig	\
 	$(DEP_LIBS_eagle.app.v6)	\
 	-Wl,--end-group	\
 	-lm

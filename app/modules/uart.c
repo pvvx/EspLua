@@ -10,9 +10,10 @@
 #include "c_types.h"
 #include "c_string.h"
 
-static lua_State *gL = NULL;
+static lua_State *gL DATA_IRAM_ATTR; // = NULL;
 static int uart_receive_rf = LUA_NOREF;
 bool run_input = true;
+
 bool uart_on_data_cb(const char *buf, size_t len){
   if(!buf || len==0)
     return false;
@@ -26,7 +27,7 @@ bool uart_on_data_cb(const char *buf, size_t len){
   return !run_input;
 }
 
-uint16_t need_len = 0;
+uint32_t need_len DATA_IRAM_ATTR; //  = 0;
 int16_t end_char = -1;
 // Lua: uart.on("method", [number/char], function, [run_input])
 static int uart_on( lua_State* L )
@@ -41,7 +42,7 @@ static int uart_on( lua_State* L )
 
   if( lua_type( L, stack ) == LUA_TNUMBER )
   {
-    need_len = ( uint16_t )luaL_checkinteger( L, stack );
+    need_len = luaL_checkinteger( L, stack );
     stack++;
     end_char = -1;
     if( need_len > 255 ){

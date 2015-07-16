@@ -30,6 +30,7 @@
 static int node_restart( lua_State* L )
 {
   system_restart();
+  task_delay_us(1000000);
   return 0;
 }
 
@@ -250,7 +251,7 @@ static int node_input( lua_State* L )
       load->line_position = c_strlen(load->line) + 1;
       load->done = 1;
       NODE_DBG("Get command:\n");
-      NODE_DBG(load->line); // buggy here
+      NODE_DBG_(load->line); // buggy here
       NODE_DBG("\nResult(if any):\n");
 /*      os_timer_disarm(&lua_timer);
       os_timer_setfn(&lua_timer, (os_timer_func_t *)dojob, load);
@@ -346,7 +347,7 @@ static int node_compile( lua_State* L )
 
   output[c_strlen(output) - 2] = 'c';
   output[c_strlen(output) - 1] = '\0';
-  NODE_DBG(output);
+  NODE_DBG_(output);
   NODE_DBG("\n");
   if (luaL_loadfsfile(L, fname) != 0) {
     return luaL_error(L, lua_tostring(L, -1));
@@ -424,7 +425,7 @@ const LUA_REG_TYPE node_map[] =
   { LSTRKEY( "input" ), LFUNCVAL( node_input ) },
   { LSTRKEY( "output" ), LFUNCVAL( node_output ) },
 // Moved to adc module, use adc.readvdd33()  
-// { LSTRKEY( "readvdd33" ), LFUNCVAL( node_readvdd33) },
+//  { LSTRKEY( "readvdd33" ), LFUNCVAL( node_readvdd33) },
   { LSTRKEY( "compile" ), LFUNCVAL( node_compile) },
   { LSTRKEY( "CPU80MHZ" ), LNUMVAL( CPU80MHZ ) },
   { LSTRKEY( "CPU160MHZ" ), LNUMVAL( CPU160MHZ ) },

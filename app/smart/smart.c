@@ -8,7 +8,7 @@
 
 static os_timer_t smart_timer DATA_IRAM_ATTR;
 
-static smart_addr_map *am[ADDR_MAP_NUM];
+static smart_addr_map *am[ADDR_MAP_NUM] DATA_IRAM_ATTR;
 
 static smart_addr_map *matched DATA_IRAM_ATTR; // = NULL;
 
@@ -18,18 +18,18 @@ static int cur_channel = 1;
 
 static uint8_t mode = STATION_MODE;
 
-static uint8_t alldone = 0;
+static int alldone DATA_IRAM_ATTR; // = 0;
 
 // 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000(LSB)
 // when the bit is set, means the ssid byte is got
-static uint8_t *got_ssid DATA_IRAM_ATTR;// = NULL;
-static uint8_t *got_password DATA_IRAM_ATTR; // = NULL;
+static uint8_t *got_ssid DATA_IRAM_ATTR; // = NULL;
+static uint8_t *got_password DATA_IRAM_ATTR; //= NULL;
 
-static uint8_t *ssid_nibble DATA_IRAM_ATTR; // = NULL;
-static uint8_t *password_nibble DATA_IRAM_ATTR; // = NULL;
+static uint8_t *ssid_nibble DATA_IRAM_ATTR; //= NULL;
+static uint8_t *password_nibble DATA_IRAM_ATTR; //= NULL;
 
-static smart_succeed succeed DATA_IRAM_ATTR; // = NULL;
-static void *smart_succeed_arg DATA_IRAM_ATTR; // = NULL;
+static smart_succeed succeed DATA_IRAM_ATTR; //= NULL;
+static void *smart_succeed_arg DATA_IRAM_ATTR; //= NULL;
 
 void smart_end();
 int smart_check(uint8_t *nibble, uint16_t len, uint8_t *dst, uint8_t *got){
@@ -412,9 +412,9 @@ void detect(uint8 *arg, uint16 len){
         smart_check(password_nibble, NIBBLE_PER_BYTE*matched->pwd_len, sta_conf->password, got_password) ){
         // all done
         alldone = 1;
-        NODE_ERR_(sta_conf->ssid);
+        NODE_ERR(sta_conf->ssid);
         NODE_ERR(" %d\n", matched->ssid_len);
-        NODE_ERR_(sta_conf->password);
+        NODE_ERR(sta_conf->password);
         NODE_ERR(" %d\n", matched->pwd_len);
         smart_end();
         // if(succeed){

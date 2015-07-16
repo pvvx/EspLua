@@ -37,12 +37,12 @@ extern void * ets_idle_arg;
 extern uint32 ets_bit_count_task;
 // RAM_BIOS:3FFFDAC0 вписать в eagle.rom.addr.v6.ld
 extern ss_task ets_tab_task[32]; // 512 байт 32x16
-
+/*
 typedef struct _ets_idle_cbs{
 	tfunc_tsk func;
 	void * arg;
 }ets_idle_cbs;
-
+*/
 volatile uint32 ets_run_ret DATA_IRAM_ATTR;
 
 void ICACHE_RAM_ATTR ets_run(void)

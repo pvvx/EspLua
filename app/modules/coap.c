@@ -168,7 +168,7 @@ static int coap_start( lua_State* L, const char* mt )
     ipaddr.addr = ipaddr_addr(ip);
     c_memcpy(pesp_conn->proto.udp->local_ip, &ipaddr.addr, 4);
     NODE_DBG("UDP ip is set: ");
-    NODE_DBG(IPSTR, IP2STR(&ipaddr.addr));
+    NODE_DBG_(IPSTR, IP2STR(&ipaddr.addr));
     NODE_DBG("\n");
   }
 
@@ -285,12 +285,12 @@ static void coap_response_handler(void *arg, char *pdata, unsigned short len)
     {
       /* There is no block option set, just read the data and we are done. */
       NODE_DBG("%d.%02d\t", (pkt.hdr.code >> 5), pkt.hdr.code & 0x1F);
-      NODE_DBG((char *)pkt.payload.p);
+      NODE_DBG_((char *)pkt.payload.p);
     }
     else if (COAP_RESPONSE_CLASS(pkt.hdr.code) >= 4)
     {
       NODE_DBG("%d.%02d\t", (pkt.hdr.code >> 5), pkt.hdr.code & 0x1F);
-      NODE_DBG((char *)pkt.payload.p);
+      NODE_DBG_((char *)pkt.payload.p);
     }
   }
 
@@ -352,12 +352,12 @@ static int coap_request( lua_State* L, coap_method_t m )
 
     ipaddr.addr = ipaddr_addr(host);
     NODE_DBG("Host len(%d):", uri->host.length);
-    NODE_DBG(host);
+    NODE_DBG_(host);
     NODE_DBG("\n");
 
     c_memcpy(pesp_conn->proto.udp->remote_ip, &ipaddr.addr, 4);
     NODE_DBG("UDP ip is set: ");
-    NODE_DBG(IPSTR, IP2STR(&ipaddr.addr));
+    NODE_DBG_(IPSTR, IP2STR(&ipaddr.addr));
     NODE_DBG("\n");
   }
 

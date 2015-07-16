@@ -47,9 +47,9 @@ extern int c_stderr;
 #define	SEEK_END	2	/* set file offset to EOF plus offset */
 #endif
 
-#define c_malloc os_malloc
-#define c_zalloc os_zalloc
-#define c_free os_free
+// #define c_malloc os_malloc
+// #define c_zalloc os_zalloc
+// #define c_free os_free
 
 extern void output_redirect(const char *str);
 #define c_puts output_redirect
@@ -60,21 +60,14 @@ extern void output_redirect(const char *str);
 #define c_sprintf os_sprintf
 #else
 #include "c_stdarg.h"
-void c_sprintf(char* s, char *fmt, ...);
+void c_sprintf(char* s,char *fmt, ...);
 #endif
 
 // #define c_vsprintf ets_vsprintf
-
-#define c_printf(...) do {	\
-	char * buf = (char *)pvPortZalloc(BUFSIZ); \
-    if(buf) {	c_sprintf(buf, __VA_ARGS__);	\
-	c_puts(buf); vPortFree(buf); }			\
-} while(0)
-
-#define c_printf_(...) do {	\
-	char * buf = (char *)pvPortZalloc(BUFSIZ); \
-    if(buf) {	c_sprintf(buf, __VA_ARGS__);	\
-	c_puts(buf); vPortFree(buf); }			\
+#define c_printf(...) do {					\
+	unsigned char __print_buf[BUFSIZ];		\
+	c_sprintf(__print_buf, __VA_ARGS__);	\
+	c_puts(__print_buf);					\
 } while(0)
 
 // #define c_getc ets_getc

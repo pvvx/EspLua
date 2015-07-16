@@ -556,7 +556,7 @@ static int mqtt_socket_client( lua_State* L )
   lmqtt_userdata *mud;
   char tempid[20] = {0};
   c_sprintf(tempid, "%s%x", "NodeMCU_", system_get_chip_id() );
-  NODE_DBG(tempid);
+  NODE_DBG_(tempid);
   NODE_DBG("\n");
   
   const char *clientId = tempid, *username = NULL, *password = NULL;

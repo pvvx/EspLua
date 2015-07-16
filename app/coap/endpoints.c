@@ -165,7 +165,7 @@ end:
 
 extern lua_Load gLoad;
 //extern os_timer_t lua_timer;
-//extern void dojob_cb(lua_Load *load);
+//extern void dojob(lua_Load *load);
 static const coap_endpoint_path_t path_command = {2, {"v1", "c"}};
 static int handle_post_command(const coap_endpoint_t *ep, coap_rw_buffer_t *scratch, const coap_packet_t *inpkt, coap_packet_t *outpkt, uint8_t id_hi, uint8_t id_lo)
 {

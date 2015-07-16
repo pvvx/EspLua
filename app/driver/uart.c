@@ -20,9 +20,12 @@
 // UartDev is defined and initialized in rom code.
 extern UartDevice UartDev;
 
-//LOCAL void ICACHE_RAM_ATTR uart0_rx_intr_handler(void *para);
-extern int run_readline;
+#ifdef USE_ROM_UART_FUNCS
 extern void uart_rx_intr_handler(void *para);
+#else
+LOCAL void ICACHE_RAM_ATTR uart0_rx_intr_handler(void *para);
+#define uart_rx_intr_handler uart0_rx_intr_handler
+#endif
 
 /******************************************************************************
  * FunctionName : uart_config
@@ -169,7 +172,7 @@ void ICACHE_FLASH_ATTR uart0_putc(const char c)
     uart_tx_one_char(UART0, c);
   }
 }
-#if 0
+#ifndef USE_ROM_UART_FUNCS
 /******************************************************************************
  * FunctionName : uart0_rx_intr_handler
  * Description  : Internal used function
@@ -200,10 +203,9 @@ uart0_rx_intr_handler(void *para)
         *(pRxBuff->pWritePos) = RcvChar;
 
         // insert here for get one command line from uart
-        if (RcvChar == '\r' || RcvChar == '\n' ) {
+/*        if (RcvChar == '\r' || RcvChar == '\n' ) {
             pRxBuff->BuffState = WRITE_OVER;
-            run_readline++;
-        }
+        } */
         
         if (pRxBuff->pWritePos == (pRxBuff->pRcvMsgBuff + RX_BUFF_SIZE)) {
             // overflow ...we may need more error handle here.
@@ -240,9 +242,9 @@ uart_init(UartBautRate uart0_br, UartBautRate uart1_br)
     ETS_UART_INTR_ENABLE();
 
     // install uart1 putc callback
-#ifndef NODE_DEBUG
+//#ifndef NODE_DEBUG
     os_install_putc1((void *)uart1_write_char);
-#endif
+//#endif
 }
 
 void ICACHE_FLASH_ATTR
