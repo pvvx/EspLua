@@ -9,6 +9,11 @@
 #define DEBUGSOO 1
 #define USE_PVV_SPIFLASH 1
 #define USE_MAX_IRAM 48k
+#define USE_ROM_UART_FUNCS
+
+#ifdef USE_ROM_UART_FUNCS
+#define UART_RAM_BUF_SIZE (256+100)
+#endif
 
 // #define DEVELOP_VERSION
 //#define NODE_DEBUG
@@ -61,7 +66,6 @@
 
 // #define LUA_NUMBER_INTEGRAL
 
-#define USE_ROM_UART_FUNCS
 
 #define LUA_OPTRAM
 #ifdef LUA_OPTRAM

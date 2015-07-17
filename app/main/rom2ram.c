@@ -233,6 +233,19 @@ char ICACHE_RAM_ATTR get_rom_chr(const char *ps)
 	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
 }
 
+void ICACHE_RAM_ATTR write_iram_chr(unsigned char *pd, unsigned char c)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	unsigned int *p = (unsigned int *)((unsigned int)pd & (~3));
+	unsigned int xlen = (unsigned int)pd & 3;
+	tmp.ud = *p;
+	tmp.uc[xlen] = c;
+	*p = tmp.ud;
+}
+
 #if 0
 
 /*

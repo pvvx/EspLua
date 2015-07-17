@@ -23,7 +23,7 @@
 #include "os_type.h"
 
 //os_timer_t lua_timer;
-LOCAL os_timer_t readline_timer DATA_IRAM_ATTR;
+//LOCAL os_timer_t readline_timer DATA_IRAM_ATTR;
 
 lua_State *globalL = NULL;
 
@@ -540,9 +540,10 @@ void dojob_cb(lua_Load *load){
   load->done = 0;
   load->line_position = 0;
   c_memset(load->line, 0, load->len);
-  os_timer_disarm(&readline_timer);
+/*  os_timer_disarm(&readline_timer);
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
-  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
+  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat */
+  set_lua_readline(load);
   c_puts(load->prmt);
   // NODE_DBG("dojob() is called with firstline.\n");
 }
@@ -627,8 +628,6 @@ void readline(lua_Load *load){
         if (load->line_position > 0)
         {
           if(uart0_echo) { uart_putc(0x08); uart_putc(' '); uart_putc(0x08); }
-//          if(uart0_echo) uart_putc(' ');
-//          if(uart0_echo) uart_putc(0x08);
           load->line_position--;
         }
         load->line[load->line_position] = 0;
@@ -654,9 +653,10 @@ void readline(lua_Load *load){
         {
           /* Get a empty line, then go to get a new line */
           c_puts(load->prmt);
-          os_timer_disarm(&readline_timer);
+/*          os_timer_disarm(&readline_timer);
           os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
-          os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
+          os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat */
+          set_lua_readline(load);
         } else {
           load->done = 1;
 /*          os_timer_disarm(&lua_timer);
@@ -705,7 +705,8 @@ void readline(lua_Load *load){
     load->line_position = 0;
   }
   // if there is no input from user, repeat readline()
-  os_timer_disarm(&readline_timer);
+/*  os_timer_disarm(&readline_timer);
   os_timer_setfn(&readline_timer, (os_timer_func_t *)readline, load);
-  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat
+  os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat */
+  set_lua_readline(load);
 }

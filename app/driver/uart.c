@@ -13,9 +13,13 @@
 #include "osapi.h"
 #include "driver/uart.h"
 #include "user_config.h"
+#include "rom2ram.h"
 
 #define UART0   0
 #define UART1   1
+
+uint32 uart_buf_WritePos DATA_IRAM_ATTR;
+uint32 uart_buf_ReadPos DATA_IRAM_ATTR;
 
 // UartDev is defined and initialized in rom code.
 extern UartDevice UartDev;
@@ -43,6 +47,9 @@ uart_config(uint8 uart_no)
     } else {
         /* rcv_buff size if 0x100 */
         UartDev.buff_uart_no = 0;
+#ifdef        USE_ROM_UART_FUNCS
+        UartDev.rcv_buff.RcvBuffSize = UART_RAM_BUF_SIZE;
+#endif
         ETS_UART_INTR_ATTACH(uart_rx_intr_handler,  &(UartDev.rcv_buff));
         PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
@@ -173,6 +180,7 @@ void ICACHE_FLASH_ATTR uart0_putc(const char c)
   }
 }
 #ifndef USE_ROM_UART_FUNCS
+
 /******************************************************************************
  * FunctionName : uart0_rx_intr_handler
  * Description  : Internal used function
@@ -180,6 +188,11 @@ void ICACHE_FLASH_ATTR uart0_putc(const char c)
  * Parameters   : void *para - point to ETS_UART_INTR_ATTACH's arg
  * Returns      : NONE
 *******************************************************************************/
+
+//uint32 old_run_lua_readline DATA_IRAM_ATTR;
+//extern bool uart0_echo;
+//extern bool run_input;
+
 LOCAL void
 uart0_rx_intr_handler(void *para)
 {
@@ -197,32 +210,37 @@ uart0_rx_intr_handler(void *para)
 
     while (READ_PERI_REG(UART_STATUS(UART0)) & (UART_RXFIFO_CNT << UART_RXFIFO_CNT_S)) {
         RcvChar = READ_PERI_REG(UART_FIFO(UART0));// & 0xFF;
-
-        /* you can add your handle code below.*/
-
-        *(pRxBuff->pWritePos) = RcvChar;
-
         // insert here for get one command line from uart
 /*        if (RcvChar == '\r' || RcvChar == '\n' ) {
             pRxBuff->BuffState = WRITE_OVER;
         } */
-        
-        if (pRxBuff->pWritePos == (pRxBuff->pRcvMsgBuff + RX_BUFF_SIZE)) {
-            // overflow ...we may need more error handle here.
-            pRxBuff->pWritePos = pRxBuff->pRcvMsgBuff ;
-        } else {
-            pRxBuff->pWritePos++;
-        }
+        write_iram_chr(&((uint8 *)(eraminfo.base))[uart_buf_WritePos++], RcvChar);
 
-        if (pRxBuff->pWritePos == pRxBuff->pReadPos){   // overflow one byte, need push pReadPos one byte ahead
-            if (pRxBuff->pReadPos == (pRxBuff->pRcvMsgBuff + RX_BUFF_SIZE)) {
-                pRxBuff->pReadPos = pRxBuff->pRcvMsgBuff ; 
-            } else {
-                pRxBuff->pReadPos++;
-            }
+        if (uart_buf_WritePos == eraminfo.size) {
+        	uart_buf_WritePos = 0;
+        };
+        if(uart_buf_WritePos == uart_buf_ReadPos) {
+            if (++uart_buf_ReadPos == eraminfo.size) {
+            	uart_buf_ReadPos = 0;
+            };
         }
     }
 }
+
+bool uart_getc(char *c){
+    ets_intr_lock();
+    if(uart_buf_WritePos == uart_buf_ReadPos){   // empty
+        ets_intr_unlock();
+        return false;
+    }
+    *c = get_rom_chr(&((uint8 *)(eraminfo.base))[uart_buf_ReadPos]);
+    if (++uart_buf_ReadPos == eraminfo.size) {
+    	uart_buf_ReadPos = 0;
+    };
+    ets_intr_unlock();
+    return true;
+}
+
 #endif
 /******************************************************************************
  * FunctionName : uart_init

@@ -27,15 +27,17 @@
 #define SIG_LUA 0
 #define SIG_DOJOB 1
 #define SIG_TIMER 2
-#define SIG_FSMNT 3
+#define SIG_RDLINE 3
+#define SIG_FSMNT 4
 #define TASK_QUEUE_LEN 8
 
-//os_event_t *taskQueue DATA_IRAM_ATTR;
 os_event_t lua_taskQueue[TASK_QUEUE_LEN] DATA_IRAM_ATTR;
+os_timer_t readline_timer DATA_IRAM_ATTR;
 
 extern uint32 stack_low;
 
 extern void dojob_cb(void *);
+extern void readline(void *);
 extern void alarm_timer_common_cb(unsigned b);
 extern void spiffs_mount();
 
@@ -57,7 +59,11 @@ void task_lua(os_event_t *e){
 	NODE_DBG("Task_lua(%u, %p)\n", e->sig, e->par);
     switch(e->sig) {
     	case SIG_DOJOB:
+    		os_timer_disarm(&readline_timer);
     		dojob_cb((void *)e->par);
+    		break;
+    	case SIG_RDLINE:
+    		readline((void *)e->par);
     		break;
     	case SIG_TIMER:
     		alarm_timer_common_cb((int)e->par);
@@ -87,6 +93,17 @@ void set_lua_timer(int i)
 	system_os_post(USER_TASK_PRIO_0, SIG_TIMER, i);
 }
 
+void ICACHE_RAM_ATTR set_run_lua_readline(void *a)
+{
+	system_os_post(USER_TASK_PRIO_0, SIG_RDLINE, (uint32)a);
+}
+
+void set_lua_readline(void *a)
+{
+	os_timer_disarm(&readline_timer);
+    os_timer_setfn(&readline_timer, (os_timer_func_t *)set_run_lua_readline, a);
+	os_timer_arm(&readline_timer, READLINE_INTERVAL, 0);   // no repeat */
+}
 
 void user_rf_pre_init(void)
 {
