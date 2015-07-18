@@ -200,7 +200,7 @@ static int incomplete (lua_State *L, int status) {
     size_t lmsg;
     const char *msg = lua_tolstring(L, -1, &lmsg);
     const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
-    if (c_strstr(msg, LUA_QL("<eof>")) == tp) {
+    if ((const char *)c_strstr(msg, LUA_QL("<eof>")) == tp) {
       lua_pop(L, 1);
       return 1;
     }

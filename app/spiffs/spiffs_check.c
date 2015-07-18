@@ -190,7 +190,7 @@ static s32_t spiffs_lookup_check_validate(spiffs *fs, spiffs_obj_id lu_obj_id, s
           res = spiffs_rewrite_index(fs, p_hdr->obj_id, p_hdr->span_ix, new_pix, objix_pix);
           if (res <= _SPIFFS_ERR_CHECK_FIRST && res > _SPIFFS_ERR_CHECK_LAST) {
             // index bad also, cannot mend this file
-            SPIFFS_CHECK_DBG("LU: FIXUP: index bad %i, cannot mend!\n", res);
+            SPIFFS_CHECK_DBG("LU: FIXUP: index bad %d, cannot mend!\n", res);
             res = spiffs_page_delete(fs, new_pix);
             SPIFFS_CHECK_RES(res);
             res = spiffs_delete_obj_lazy(fs, p_hdr->obj_id);
@@ -249,7 +249,7 @@ static s32_t spiffs_lookup_check_validate(spiffs *fs, spiffs_obj_id lu_obj_id, s
               res = spiffs_rewrite_index(fs, p_hdr->obj_id, p_hdr->span_ix, new_pix, objix_pix);
               if (res <= _SPIFFS_ERR_CHECK_FIRST && res > _SPIFFS_ERR_CHECK_LAST) {
                 // index bad also, cannot mend this file
-                SPIFFS_CHECK_DBG("LU: FIXUP: index bad %i, cannot mend!\n", res);
+                SPIFFS_CHECK_DBG("LU: FIXUP: index bad %d, cannot mend!\n", res);
                 res = spiffs_page_delete(fs, new_pix);
                 SPIFFS_CHECK_RES(res);
                 res = spiffs_delete_obj_lazy(fs, p_hdr->obj_id);
@@ -501,7 +501,7 @@ static s32_t spiffs_page_consistency_check_i(spiffs *fs) {
   while (pix_offset < SPIFFS_PAGES_PER_BLOCK(fs) * fs->block_count) {
     // set this flag to abort all checks and rescan the page range
     u8_t restart = 0;
-    c_memset(fs->work, 0, SPIFFS_CFG_LOG_PAGE_SZ(fs));
+    memset(fs->work, 0, SPIFFS_CFG_LOG_PAGE_SZ(fs));
 
     spiffs_block_ix cur_block = 0;
     // build consistency bitmap for id range traversing all blocks
@@ -597,7 +597,7 @@ static s32_t spiffs_page_consistency_check_i(spiffs *fs) {
                   data_spix_offset + i, data_pix, cur_pix);
               if (res <= _SPIFFS_ERR_CHECK_FIRST && res > _SPIFFS_ERR_CHECK_LAST) {
                 // index bad also, cannot mend this file
-                SPIFFS_CHECK_DBG("PA: FIXUP: index bad %i, cannot mend - delete object\n", res);
+                SPIFFS_CHECK_DBG("PA: FIXUP: index bad %d, cannot mend - delete object\n", res);
                 if (fs->check_cb_f) fs->check_cb_f(SPIFFS_CHECK_PAGE, SPIFFS_CHECK_DELETE_BAD_FILE, objix_p_hdr->obj_id, 0);
                 // delete file
                 res = spiffs_page_delete(fs, cur_pix);
@@ -647,7 +647,7 @@ static s32_t spiffs_page_consistency_check_i(spiffs *fs) {
                  res = spiffs_rewrite_index(fs, p_hdr.obj_id, data_spix_offset + i, data_pix, cur_pix);
                  if (res <= _SPIFFS_ERR_CHECK_FIRST && res > _SPIFFS_ERR_CHECK_LAST) {
                    // index bad also, cannot mend this file
-                   SPIFFS_CHECK_DBG("PA: FIXUP: index bad %i, cannot mend!\n", res);
+                   SPIFFS_CHECK_DBG("PA: FIXUP: index bad %d, cannot mend!\n", res);
                    if (fs->check_cb_f) fs->check_cb_f(SPIFFS_CHECK_PAGE, SPIFFS_CHECK_DELETE_BAD_FILE, p_hdr.obj_id, 0);
                    res = spiffs_delete_obj_lazy(fs, p_hdr.obj_id);
                  } else {
@@ -763,7 +763,7 @@ static s32_t spiffs_page_consistency_check_i(spiffs *fs) {
               res = spiffs_rewrite_index(fs, p_hdr.obj_id, p_hdr.span_ix, cur_pix, objix_pix);
               if (res <= _SPIFFS_ERR_CHECK_FIRST && res > _SPIFFS_ERR_CHECK_LAST) {
                 // index bad also, cannot mend this file
-                SPIFFS_CHECK_DBG("PA: FIXUP: index bad %i, cannot mend!\n", res);
+                SPIFFS_CHECK_DBG("PA: FIXUP: index bad %d, cannot mend!\n", res);
                 if (fs->check_cb_f) fs->check_cb_f(SPIFFS_CHECK_PAGE, SPIFFS_CHECK_DELETE_BAD_FILE, p_hdr.obj_id, 0);
                 res = spiffs_page_delete(fs, cur_pix);
                 SPIFFS_CHECK_RES(res);
@@ -956,7 +956,7 @@ s32_t spiffs_object_index_consistency_check(spiffs *fs) {
   // indicating whether they can be reached or not. Acting as a fifo if object ids cannot fit.
   // In the temporary object index memory, SPIFFS_OBJ_ID_IX_FLAG bit is used to indicate
   // a reachable/unreachable object id.
-  c_memset(fs->work, 0, SPIFFS_CFG_LOG_PAGE_SZ(fs));
+  memset(fs->work, 0, SPIFFS_CFG_LOG_PAGE_SZ(fs));
   u32_t obj_id_log_ix = 0;
   if (fs->check_cb_f) fs->check_cb_f(SPIFFS_CHECK_INDEX, SPIFFS_CHECK_PROGRESS, 0, 0);
   res = spiffs_obj_lu_find_entry_visitor(fs, 0, 0, 0, 0, spiffs_object_index_consistency_check_v, 0, &obj_id_log_ix,

@@ -246,7 +246,7 @@ void ICACHE_RAM_ATTR write_iram_chr(unsigned char *pd, unsigned char c)
 	*p = tmp.ud;
 }
 
-#if 0
+#if 1
 
 /*
 Name: strchr
@@ -286,7 +286,9 @@ const char * ICACHE_RAM_ATTR rom_strchr(const char * ps, char c)
 		p++;
 	}
 }
+#endif
 
+#if 0
 int ICACHE_RAM_ATTR rom_memcmp( void * ps, const char * pd_, unsigned int len)
 {
 	union {

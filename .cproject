@@ -31,6 +31,19 @@
 								<option id="gnu.c.compiler.option.include.paths.447310503" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/spiffs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/cjson}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/coap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/crypto}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/dhtlib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/libc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/lua}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/modules}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/mqtt}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/platform}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/smart}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/u8glib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/EspLua/app/user}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1823936060" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

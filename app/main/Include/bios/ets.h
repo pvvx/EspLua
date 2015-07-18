@@ -46,7 +46,7 @@ int ets_strncmp(const char *s1, const char *s2, size_t size);
 /* This is like strchr, except that it searches haystack for a substring needle rather than just a single character. It
  returns a pointer into the string haystack that is the first character of the substring, or a null pointer if no match
  was found. If needle is an empty string, the function returns haystack. */
-char *ets_strstr(const char *haystack, const char *needle);
+const char *ets_strstr(const char *haystack, const char *needle);
 /* The function memcmp compares the size bytes of memory beginning at a1 against the size bytes of memory
  beginning at a2. The value returned has the same sign as the difference between the first differing pair of bytes
  (interpreted as unsigned char objects, then promoted to int).

@@ -65,7 +65,7 @@ The function strrchr is like strchr, except that it searches backwards
 For example,
          strrchr ("hello, world", 'l')
               "ld"	*/
-char * ICACHE_FLASH_ATTR ets_strrchr(const char *string, int c)
+const char * ICACHE_FLASH_ATTR ets_strrchr(const char *string, unsigned char c)
 {
 	char * pret = NULL;
 	if(string != NULL) {
