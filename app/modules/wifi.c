@@ -1161,7 +1161,6 @@ static const LUA_REG_TYPE wifi_ap_map[] =
   { LSTRKEY( "getmac" ), LFUNCVAL ( wifi_ap_getmac ) },
   { LSTRKEY( "setmac" ), LFUNCVAL ( wifi_ap_setmac ) },
   { LSTRKEY( "getclient" ), LFUNCVAL ( wifi_ap_listclient ) },
-  { LSTRKEY( "maxtpower" ), LFUNCVAL( wifi_phy_set_max_tpw) },
 #if LUA_OPTIMIZE_MEMORY > 0
   { LSTRKEY( "dhcp" ), LROVAL( wifi_ap_dhcp_map ) },
 
@@ -1180,6 +1179,7 @@ const LUA_REG_TYPE wifi_map[] =
   { LSTRKEY( "startsmart" ), LFUNCVAL( wifi_start_smart ) },
   { LSTRKEY( "stopsmart" ), LFUNCVAL( wifi_exit_smart ) },
   { LSTRKEY( "sleeptype" ), LFUNCVAL( wifi_sleeptype ) },
+  { LSTRKEY( "max_tpw" ), LFUNCVAL( wifi_phy_set_max_tpw) },
 #if LUA_OPTIMIZE_MEMORY > 0
   { LSTRKEY( "sta" ), LROVAL( wifi_station_map ) },
   { LSTRKEY( "ap" ), LROVAL( wifi_ap_map ) },
