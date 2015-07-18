@@ -21,6 +21,7 @@
 - Используются Integer и Float.
 
 # Журнал версий
+2015-07-18 - добавление [SDRAM Optimization Patch for SDK_v1.2.0] (http://bbs.espressif.com/viewtopic.php?f=5&t=734&sid=abcc534cb6029dfed9c5c304a39e7341)<br />
 2015-07-17 - замена п.п. ввода UART, ремонт spiffs<br />
 2015-07-15 - перестройка вызовов задач (ets_ru(), wdt)<br />
 2015-07-10 - переход на SDK ver 1.2.0<br />
@@ -33,11 +34,10 @@
 #Стартовый лог c парой команд
 
 ```lua
-EspLua.ru 1.2.0 build 20150716  powered by Lua 5.1.4
+EspLua.ru 1.2.0 build 20150718  powered by Lua 5.1.4
 lua: cannot open init.lua
-> tmr.delay(5000000)
 > =node.heap()
-30400
+38360
 ```
 
 
