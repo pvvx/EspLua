@@ -784,11 +784,10 @@ static int net_start( lua_State* L, const char* mt )
   }
 
   if(!isserver || pesp_conn->type == ESPCONN_UDP){    // self_ref is only needed by socket userdata, or udp server
-#if 0  
+#if 1
     if ( lua_isnumber(L, stack) ) {
       unsigned lport = luaL_checkinteger( L, stack );
-      stack++;
-      if(lport) pesp_conn->proto.tcp->local_port = lport;
+      if(lport) pesp_conn->proto.udp->local_port = lport;
     }
 #endif    
   	lua_pushvalue(L, 1);  // copy to the top of stack

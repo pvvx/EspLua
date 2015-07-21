@@ -16,7 +16,7 @@ FIRMWAREDIR = ..//bin//
 
 SDK_TOOLS	?= c:/Espressif/utils
 #ESPTOOL		?= $(SDK_TOOLS)/esptool.exe
-ESPTOOL		?= C:/Python27/python.exe $(SDK_TOOLS)/esptool.py
+ESPTOOL		?= C:/Python27/python.exe $(CWD)esptool.py
 ESPTOOL-CK	?= $(SDK_TOOLS)/esptool-ck.exe
 ESPPORT		?= COM2
 ESPBAUD		?= 460800
@@ -106,7 +106,7 @@ CPP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
 OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
 #CCFLAGS += -Os 
-CCFLAGS += -g -std=gnu90 -ffunction-sections -fno-jump-tables -fdata-sections
+CCFLAGS += -std=gnu90 -ffunction-sections -fno-jump-tables -fdata-sections
 # -ffunction-sections -fno-jump-tables -fdata-sections -foptimize-register-move -mno-target-align 
 
 CSRCS ?= $(wildcard *.c)
@@ -184,9 +184,8 @@ endef
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
 	$(vecho) "------------------------------------------------------------------------------"
-	@echo "FW ../bin/$(ADDR_FW1).bin + ../bin/$(ADDR_FW2).bin"
 ifeq ("1","1")
-	$(ESPTOOL) elf2image -o ../bin/ $(flashimageoptions) $<
+	@$(ESPTOOL) elf2image -o ../bin/ $(flashimageoptions) $<
 	$(vecho) "------------------------------------------------------------------------------"
 	$(vecho) "Add rapid_loader:"
 	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin
@@ -207,11 +206,11 @@ else
 	$(RM) -f eagle.app.v6.rodata.bin
 	mv eagle.app.flash.bin ../bin/$(ADDR_FW1).bin
 	mv eagle.app.v6.irom0text.bin ../bin/$(ADDR_FW2).bin
-endif	
 	$(vecho) "------------------------------------------------------------------------------"
 	$(vecho) "Section info:"
 	$(Q) $(SDK_TOOLS)/memanalyzer.exe $(OBJDUMP).exe $<
 	$(vecho) "------------------------------------------------------------------------------"
+endif	
 	
 
 all: .subdirs $(OBJS) $(OLIBS) $(OIMAGES) $(OBINS) $(SPECIAL_MKTARGETS)

@@ -1103,6 +1103,7 @@ static int wifi_ap_dhcp_stop( lua_State* L )
   return 1;
 }
 
+// Lua: wifi.max_tpw()
 static int wifi_phy_set_max_tpw( lua_State* L )
 {
   s32 tpw;
@@ -1115,11 +1116,29 @@ static int wifi_phy_set_max_tpw( lua_State* L )
   return 0;
 }
 
-
+// Lua: =wifi.st.rssi()
 static int wifi_st_get_rssi( lua_State* L )
 {
   lua_pushinteger(L, wifi_station_get_rssi());
   return 1;
+}
+
+// Lua: =wifi.setchl(1..13)
+static int wifi_set_chl( lua_State* L )
+{
+	bool err = false;
+	int chl = luaL_checkinteger( L, 1 );
+	if ( chl >= 1 && chl <= 13 )
+		err = wifi_set_channel(chl);
+    lua_pushboolean(L, err);
+	return 1;
+}
+
+// Lua: =wifi.getchl()
+static int wifi_get_chl( lua_State* L )
+{
+	lua_pushinteger(L, wifi_get_channel());
+	return 1;
 }
 
 // Module function map
@@ -1180,6 +1199,8 @@ const LUA_REG_TYPE wifi_map[] =
   { LSTRKEY( "stopsmart" ), LFUNCVAL( wifi_exit_smart ) },
   { LSTRKEY( "sleeptype" ), LFUNCVAL( wifi_sleeptype ) },
   { LSTRKEY( "max_tpw" ), LFUNCVAL( wifi_phy_set_max_tpw) },
+  { LSTRKEY( "setchl" ), LFUNCVAL( wifi_set_chl ) },
+  { LSTRKEY( "getchl" ), LFUNCVAL( wifi_get_chl ) },
 #if LUA_OPTIMIZE_MEMORY > 0
   { LSTRKEY( "sta" ), LROVAL( wifi_station_map ) },
   { LSTRKEY( "ap" ), LROVAL( wifi_ap_map ) },
