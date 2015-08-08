@@ -53,3 +53,13 @@ int ICACHE_FLASH_ATTR ets_sprintf(char *str, const char *format, ...)
 	va_end (args);
 	return i;
 }
+
+uint32 ICACHE_FLASH_ATTR bit_popcount(uint32 x)
+{
+	uint32 ret = 0;
+	while(x) {
+		x <<= 1;
+		ret += x & 1;
+	}
+	return ret;
+}

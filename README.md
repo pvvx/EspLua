@@ -1,11 +1,10 @@
 # **EspLua.ru** #
-Версия 1.2.0
+Версия 1.3.0
 
-Проект в стадии разработки.
-На текущий момент содержит версии только для тестов.
+Проект в стадии доработки некоторых библиотек Lua под новый SDK.
 
 ###Lua для Wi-Fi модулей esp8266
-Построен на частях от [ESP8266 sdk 1.2.0 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
+Построен на частях от [ESP8266 sdk 1.3.0 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
 Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
 Сjson на основе [lua-cjson](https://github.com/mpx/lua-cjson)<br />
 Файловая система основана на [spiffs](https://github.com/pellepl/spiffs)<br />
@@ -21,6 +20,7 @@
 - Используются Integer и Float.
 
 # Журнал версий
+2015-08-09 - Переход на SDK ver 1.3.0<br />
 2015-07-21 - Новые команды =wifi.getchl() и =wifi.setchl(1..13)<br />
 2015-07-18 - Добавление [SDRAM Optimization Patch for SDK_v1.2.0](http://bbs.espressif.com/viewtopic.php?f=5&t=734&sid=abcc534cb6029dfed9c5c304a39e7341) ('Heap' больше 36 килобайт)<br />
 2015-07-17 - Замена п.п. ввода UART, ремонт spiffs<br />
@@ -35,10 +35,10 @@
 #Стартовый лог c парой команд
 
 ```lua
-EspLua.ru 1.2.0 build 20150718  powered by Lua 5.1.4
+EspLua.ru 1.3.0 build 20150809  powered by Lua 5.1.4
 lua: cannot open init.lua
 > =node.heap()
-38360
+41576
 ```
 
 

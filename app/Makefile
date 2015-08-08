@@ -94,10 +94,10 @@ LINKFLAGS_eagle.app.v6 = \
 	-lmwpa	\
 	-lssl	\
 	-lsmartconfig	\
+	-lm	\
 	$(DEP_LIBS_eagle.app.v6)	\
-	-Wl,--end-group	\
-	-lm
-
+	-Wl,--end-group
+	 
 #	-ljson	\
 #	-lhal					\
 #	-lsmartconfig	\

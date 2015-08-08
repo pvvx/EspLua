@@ -242,6 +242,7 @@ static int wifi_getmode( lua_State* L )
   lua_pushinteger( L, mode );
   return 1;  
 }
+#if 0
 /**
   * wifi.getchannel()
   * Description:
@@ -263,7 +264,7 @@ static int wifi_getchannel( lua_State* L )
   lua_pushinteger( L, channel );
   return 1;
 }
-
+#endif
 /**
   * wifi.setphymode()
   * Description:
@@ -1192,7 +1193,7 @@ const LUA_REG_TYPE wifi_map[] =
 {
   { LSTRKEY( "setmode" ), LFUNCVAL( wifi_setmode ) },
   { LSTRKEY( "getmode" ), LFUNCVAL( wifi_getmode ) },
-  { LSTRKEY( "getchannel" ), LFUNCVAL( wifi_getchannel ) },
+//  { LSTRKEY( "getchannel" ), LFUNCVAL( wifi_getchannel ) },
   { LSTRKEY( "setphymode" ), LFUNCVAL( wifi_setphymode ) },
   { LSTRKEY( "getphymode" ), LFUNCVAL( wifi_getphymode ) },
   { LSTRKEY( "startsmart" ), LFUNCVAL( wifi_start_smart ) },
