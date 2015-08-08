@@ -58,8 +58,8 @@ uint32 ICACHE_FLASH_ATTR bit_popcount(uint32 x)
 {
 	uint32 ret = 0;
 	while(x) {
-		x <<= 1;
 		ret += x & 1;
+		x >>= 1;
 	}
 	return ret;
 }
