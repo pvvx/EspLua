@@ -13,7 +13,7 @@
 #include "c_types.h"
 #include "mem.h"
 #include "espconn.h"
-#include "lwip/dns.h" 
+#include "lwip/dns.h"
 
 #define ip4_addr_set_u32(dest_ipaddr, src_u32) ((dest_ipaddr)->addr = (src_u32))
 #define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == IPADDR_ANY)
@@ -39,7 +39,7 @@ static int socket_num DATA_IRAM_ATTR; // = 0
 static int socket[MAX_SOCKET]  DATA_IRAM_ATTR;
 static lua_State *gL DATA_IRAM_ATTR; // = NULL;
 static int tcpserver_cb_connect_ref = LUA_NOREF;  // for tcp server connected callback
-static uint16_t tcp_server_timeover = 30;
+//static uint16_t tcp_server_timeover = 30;
 
 static struct espconn *pTcpServer DATA_IRAM_ATTR; // = NULL;
 static struct espconn *pUdpServer DATA_IRAM_ATTR; // = NULL;
@@ -57,6 +57,8 @@ typedef struct lnet_userdata
 #ifdef CLIENT_SSL_ENABLE
   int secure;
 #endif
+  uint16 tcp_server_timeover;
+  uint8 tcp_options;
 }lnet_userdata;
 
 static void net_server_disconnected(void *arg)    // for tcp server only
@@ -408,20 +410,6 @@ static int net_create( lua_State* L, const char* mt )
   }
 #endif
 
-  if(isserver && type == ESPCONN_TCP){
-    if ( lua_isnumber(L, stack) )
-    {
-      unsigned to = lua_tointeger(L, stack);
-      stack++;
-      if ( to < 1 || to > 28800 ){
-        return luaL_error( L, "wrong arg type" );
-      }
-      tcp_server_timeover = (uint16_t)to;
-    } else {
-      tcp_server_timeover = 30; // default to 30
-    }
-  }
-
   // create a object
   nud = (lnet_userdata *)lua_newuserdata(L, sizeof(lnet_userdata));
   // pre-initialize it, in case of errors
@@ -436,6 +424,32 @@ static int net_create( lua_State* L, const char* mt )
 #ifdef CLIENT_SSL_ENABLE
   nud->secure = secure;
 #endif
+
+  if(type == ESPCONN_TCP){
+      if ( lua_isnumber(L, stack) )
+      {
+    	  if(isserver){
+    	      unsigned to = lua_tointeger(L, stack);
+    	      stack++;
+    	      if ( to < 1 || to > 7200 ){
+    	        return luaL_error( L, "wrong arg type" );
+    	      }
+    	      nud->tcp_server_timeover = (uint16)to;
+    	  }
+          if ( lua_isnumber(L, stack) ) {
+    	      unsigned to = lua_tointeger(L, stack);
+    	      stack++;
+    	      if ( to < 0 || to > 0x0F ){
+      	        return luaL_error( L, "wrong arg type" );
+      	      }
+      	      nud->tcp_options = (uint8)to;
+          }
+      }
+      else {
+	    	nud->tcp_server_timeover = 30; // default to 30
+	    	nud->tcp_options = 0; // default to 0
+      }
+  }
 
   // set its metatable
   luaL_getmetatable(L, mt);
@@ -798,6 +812,7 @@ static int net_start( lua_State* L, const char* mt )
 
   if( pesp_conn->type == ESPCONN_TCP )
   {
+	espconn_set_opt(pesp_conn, nud->tcp_options);
     if(isserver){   // no secure server support for now
       espconn_regist_connectcb(pesp_conn, net_server_connected);
       // tcp server, SSL is not supported
@@ -807,9 +822,10 @@ static int net_start( lua_State* L, const char* mt )
       // else
 #endif
         espconn_accept(pesp_conn);    // if it's a server, no need to dns.
-        espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
+        espconn_regist_time(pesp_conn, nud->tcp_server_timeover, 0);
     }
     else{
+
       espconn_regist_connectcb(pesp_conn, net_socket_connected);
       espconn_regist_reconcb(pesp_conn, net_socket_reconnected);
 #ifdef CLIENT_SSL_ENABLE

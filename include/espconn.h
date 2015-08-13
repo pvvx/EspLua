@@ -1,7 +1,13 @@
 #ifndef __ESPCONN_H__
 #define __ESPCONN_H__
 
+#include "os_type.h"
+#ifdef LWIP_OPEN_SRC
+#include "lwip/ip_addr.h"
+#else
 #include "ip_addr.h"
+#endif
+
 
 typedef sint8 err_t;
 
@@ -26,7 +32,7 @@ typedef void (* espconn_reconnect_callback)(void *arg, sint8 err);
 #define ESPCONN_ISCONN     -15   /* Already connected.       */
 
 #define ESPCONN_HANDSHAKE  -28   /* ssl handshake failed	 */
-#define ESPCONN_PROTO_MSG  -61   /* ssl application invalid	 */
+#define ESPCONN_SSL_INVALID_DATA  -61   /* ssl application invalid	 */
 
 /** Protocol family and type of the espconn */
 enum espconn_type {
@@ -270,6 +276,17 @@ sint8 espconn_regist_sentcb(struct espconn *espconn, espconn_sent_callback sent_
 sint8 espconn_regist_write_finish(struct espconn *espconn, espconn_connect_callback write_finish_fn);
 
 /******************************************************************************
+ * FunctionName : espconn_send
+ * Description  : sent data for client or server
+ * Parameters   : espconn -- espconn to set for client or server
+ *                psent -- data to send
+ *                length -- length of data to send
+ * Returns      : none
+*******************************************************************************/
+
+sint8 espconn_send(struct espconn *espconn, uint8 *psent, uint16 length);
+
+/******************************************************************************
  * FunctionName : espconn_sent
  * Description  : sent data for client or server
  * Parameters   : espconn -- espconn to set for client or server
@@ -427,6 +444,17 @@ sint8 espconn_secure_connect(struct espconn *espconn);
 *******************************************************************************/
 
 sint8 espconn_secure_disconnect(struct espconn *espconn);
+
+/******************************************************************************
+ * FunctionName : espconn_secure_send
+ * Description  : sent data for client or server
+ * Parameters   : espconn -- espconn to set for client or server
+ * 				  psent -- data to send
+ *                length -- length of data to send
+ * Returns      : none
+*******************************************************************************/
+
+sint8 espconn_secure_send(struct espconn *espconn, uint8 *psent, uint16 length);
 
 /******************************************************************************
  * FunctionName : espconn_encry_sent

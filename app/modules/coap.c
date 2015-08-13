@@ -12,7 +12,7 @@
 
 #include "c_types.h"
 #include "mem.h"
-#include "espconn.h"
+//#include "espconn.h"
 #include "driver/uart.h"
 
 #include "coap.h"

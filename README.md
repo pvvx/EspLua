@@ -20,6 +20,7 @@
 - Используются Integer и Float.
 
 # Журнал версий
+2015-08-13 - Добавка: net.createServer(net.TCP[,timeout[, options]]) / net.createConnection(net.TCP[, secure[, options]])<br /> 
 2015-08-09 - Переход на SDK ver 1.3.0<br />
 2015-07-21 - Новые команды =wifi.getchl() и =wifi.setchl(1..13)<br />
 2015-07-18 - Добавление [SDRAM Optimization Patch for SDK_v1.2.0](http://bbs.espressif.com/viewtopic.php?f=5&t=734&sid=abcc534cb6029dfed9c5c304a39e7341) ('Heap' больше 36 килобайт)<br />
