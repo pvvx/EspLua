@@ -28,6 +28,7 @@
  * fpconv_* will around these issues with a translation buffer if required.
  */
 
+#if 0
 #include "c_stdio.h"
 #include "c_stdlib.h"
 // #include <assert.h>
@@ -35,7 +36,6 @@
 
 #include "fpconv.h"
 
-#if 0
 /* Lua CJSON assumes the locale is the same for all threads within a
  * process and doesn't change after initialisation.
  *

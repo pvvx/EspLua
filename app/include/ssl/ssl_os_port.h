@@ -44,7 +44,7 @@ extern "C" {
 //#include "../crypto/os_int.h"
 #include "c_types.h"
 #include "osapi.h"
-#include <stdio.h>
+//#include <stdio.h>
 
 #if 0
 #define ssl_printf(fmt, args...) os_printf(fmt,## args)

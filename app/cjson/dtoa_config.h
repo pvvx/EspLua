@@ -1,9 +1,9 @@
 #ifndef _DTOA_CONFIG_H
 #define _DTOA_CONFIG_H
 #if 0
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include "stdio.h"
+#include "stdlib.h"
+#include "stdint.h"
 
 /* Ensure dtoa.c does not USE_LOCALE. Lua CJSON must not use locale
  * aware conversion routines. */

@@ -1,17 +1,20 @@
 # **EspLua.ru** #
-Версия 1.3.0
+Версия 1.4.0 (на базе Espressif SDK версии 1.4.0 + патчи)
 
-Проект в стадии доработки некоторых библиотек Lua под новый SDK.
+Проект в стадии доработки некоторых библиотек Lua под новый SDK<br /> 
+и избавления от глючных библиотек [NodeMCU](https://github.com/nodemcu/nodemcu-firmware)<br />
 
 ###Lua для Wi-Fi модулей esp8266
-Построен на частях от [ESP8266 sdk 1.3.0 + Патчи](http://bbs.espressif.com/viewforum.php?f=5) с изменениями<br />
+Построен на частях от [ESP8266 sdk 1.4.0 + Патчи](http://bbs.espressif.com/viewforum.php?f=46) с изменениями<br />
 Ядро Lua на основе [eLua проекта](http://www.eluaproject.net/)<br />
 Сjson на основе [lua-cjson](https://github.com/mpx/lua-cjson)<br />
 Файловая система основана на [spiffs](https://github.com/pellepl/spiffs)<br />
 Транслятор [UDK GCC 5.1](http://esp8266.ru/forum/threads/anonsy-unofficial-development-kit-for-espressif-esp8266.32/)
+Ускоряющий загрузчик [Rapid Loader v3](https://github.com/pvvx/Rapid_Loader)
+
 
 # Резюме
-- Для детей, поиграться на вечер 
+- Для детей, поиграться на вечер (на большее Lua на ESP8266 не рассчитана) 
 - Легкий доступ к беспроводному маршрутизатору
 - Основа (ядро) на Lua 5.1.4
 - Предпочтительно программирование событий-Драйв.

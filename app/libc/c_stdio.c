@@ -1103,4 +1103,9 @@ void c_sprintf(char *s, char *fmt, ...)
     va_end(arg);
 }
 
+void abort(void)
+{
+	_ResetVector();
+	while(1);
+}
 #endif

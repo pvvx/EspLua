@@ -195,7 +195,7 @@ do
   local createServer = function(port, handler)
     -- NB: only one server at a time
     if srv then srv:close() end
-    srv = net.createServer(net.TCP, 15, 1)
+    srv = net.createServer(net.TCP, 15)
     -- listen
     srv:listen(port, http_handler(handler))
     return srv

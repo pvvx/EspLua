@@ -5,11 +5,11 @@
 */
 
 
-#include <errno.h>
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "errno.h"
+#include "locale.h"
+#include "stdlib.h"
+#include "string.h"
+#include "time.h"
 
 #define loslib_c
 #define LUA_LIB

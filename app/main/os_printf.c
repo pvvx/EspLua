@@ -41,7 +41,10 @@ int ICACHE_FLASH_ATTR rom_printf(const char *format, ...)
 //-----------------------------------------------------------------------------
 void ICACHE_RAM_ATTR _sprintf_out(char c)
 {
-	if(_sprintf_buf != NULL) *_sprintf_buf++ = c;
+	if(_sprintf_buf != NULL) {
+		*_sprintf_buf++ = c;
+		*_sprintf_buf = 0;
+	}
 }
 
 int ICACHE_FLASH_ATTR ets_sprintf(char *str, const char *format, ...)

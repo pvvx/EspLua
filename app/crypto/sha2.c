@@ -36,7 +36,7 @@
 
 #ifdef SHA2_ENABLE
 #include "sha2.h"
-#include <string.h>	/* memcpy()/memset() or bcopy()/bzero() */
+//#include <string.h>	/* memcpy()/memset() or bcopy()/bzero() */
 #define assert(x) do {} while (0)
 
 /*
@@ -119,12 +119,12 @@ typedef uint64_t sha2_word64;	/* Exactly 8 bytes */
 #endif
 
 #ifdef SHA2_USE_MEMSET_MEMCPY
-#define MEMSET_BZERO(p,l)	memset((p), 0, (l))
-#define MEMCPY_BCOPY(d,s,l)	memcpy((d), (s), (l))
+#define MEMSET_BZERO(p,l)	os_memset((p), 0, (l))
+#define MEMCPY_BCOPY(d,s,l)	os_memcpy((d), (s), (l))
 #endif
 #ifdef SHA2_USE_BZERO_BCOPY
-#define MEMSET_BZERO(p,l)	bzero((p), (l))
-#define MEMCPY_BCOPY(d,s,l)	bcopy((s), (d), (l))
+#define MEMSET_BZERO(p,l)	os_bzero((p), (l))
+#define MEMCPY_BCOPY(d,s,l)	os_bcopy((s), (d), (l))
 #endif
 
 
