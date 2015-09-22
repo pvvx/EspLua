@@ -39,13 +39,11 @@
 #Стартовый лог c парой команд
 
 ```lua
-EspLua.ru 1.3.0 build 20150809  powered by Lua 5.1.4
+EspLua.ru 1.4.0 build 20150922  powered by Lua 5.1.4
 lua: cannot open init.lua
 > =node.heap()
 41576
 ```
-
-
 
 ##Таблица GPIO
 
