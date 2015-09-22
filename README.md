@@ -1,7 +1,8 @@
 # **EspLua.ru** #
 Версия 1.4.0 (на базе Espressif SDK версии 1.4.0 + патчи)
 
-Проект в стадии доработки некоторых библиотек Lua под новый SDK<br /> 
+Проект в стадии доработки некоторых библиотек Lua под новые SDK от [Espressif](http://bbs.espressif.com/)<br />
+с дальнейшим переходом к полностью открытому исходному коду по мере развития [meSDK](https://github.com/pvvx/MinEspSDKLib/)<br />
 и избавления от глючных библиотек [NodeMCU](https://github.com/nodemcu/nodemcu-firmware)<br />
 
 ###Lua для Wi-Fi модулей esp8266
@@ -23,6 +24,7 @@
 - Используются Integer и Float.
 
 # Журнал версий
+2015-09-22 - Переход на SDK ver 1.4.0<br />
 2015-08-13 - Добавка: net.createServer(net.TCP[,timeout[, options]]) / net.createConnection(net.TCP[, secure[, options]])<br /> 
 2015-08-09 - Переход на SDK ver 1.3.0<br />
 2015-07-21 - Новые команды =wifi.getchl() и =wifi.setchl(1..13)<br />
